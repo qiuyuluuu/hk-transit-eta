@@ -87,6 +87,24 @@ const commuteGroups = [
         maxItems: 3,
       },
       {
+        id: "gmb-27b-university-st905",
+        provider: "gmb",
+        operator: "GMB",
+        operatorLabel: "小巴",
+        route: "27B",
+        routeId: 2007895,
+        routeSeq: 2,
+        stopSeq: 2,
+        stopId: 20002275,
+        variantLabel: "经大学站",
+        variantClass: "via",
+        stopLabel: "大学站",
+        stopCode: "ST905",
+        directionLabel: "往白石角方向",
+        officialStopLabel: "港铁大学站巴士总站",
+        maxItems: 3,
+      },
+      {
         id: "gmb-27a-sha-tin-pai-tau",
         provider: "gmb",
         operator: "GMB",
@@ -212,6 +230,8 @@ async function fetchGmbEta(config) {
         routeSeq: config.routeSeq,
         stopSeq: config.stopSeq,
         stopId: config.stopId,
+        variantLabel: config.variantLabel,
+        variantClass: config.variantClass,
       },
     ];
   const results = await Promise.allSettled(variants.map((variant) => fetchGmbVariant(config, variant)));
