@@ -36,10 +36,12 @@ const commuteGroups = [
         operator: "GMB",
         operatorLabel: "小巴",
         route: "27A",
-        routeId: 2007861,
-        routeSeq: 1,
-        stopSeq: 4,
-        stopId: 20007310,
+        variants: [
+          { routeId: 2007861, routeSeq: 1, stopSeq: 4, stopId: 20007310, variantLabel: "快车", variantClass: "fast" },
+          { routeId: 2007862, routeSeq: 1, stopSeq: 4, stopId: 20007310, variantLabel: "快车", variantClass: "fast" },
+          { routeId: 2007893, routeSeq: 1, stopSeq: 3, stopId: 20007310, variantLabel: "慢车", variantClass: "slow" },
+          { routeId: 2007894, routeSeq: 1, stopSeq: 3, stopId: 20007310, variantLabel: "慢车", variantClass: "slow" },
+        ],
         stopLabel: "逸珑湾",
         stopCode: "PA150",
         directionLabel: "往沙田方向",
@@ -52,10 +54,12 @@ const commuteGroups = [
         operator: "GMB",
         operatorLabel: "小巴",
         route: "27A",
-        routeId: 2007861,
-        routeSeq: 1,
-        stopSeq: 5,
-        stopId: 20007094,
+        variants: [
+          { routeId: 2007861, routeSeq: 1, stopSeq: 5, stopId: 20007094, variantLabel: "快车", variantClass: "fast" },
+          { routeId: 2007862, routeSeq: 1, stopSeq: 5, stopId: 20007094, variantLabel: "快车", variantClass: "fast" },
+          { routeId: 2007893, routeSeq: 1, stopSeq: 6, stopId: 20015873, variantLabel: "慢车", variantClass: "slow" },
+          { routeId: 2007894, routeSeq: 1, stopSeq: 6, stopId: 20015873, variantLabel: "慢车", variantClass: "slow" },
+        ],
         stopLabel: "云汇",
         stopCode: "PA206",
         directionLabel: "往沙田方向",
@@ -190,7 +194,6 @@ async function fetchServiceType(config, serviceType) {
 }
 
 async function fetchGmbEta(config) {
-  const path = `/api/gmb/eta/route-stop/${config.routeId}/${config.routeSeq}/${config.stopSeq}`;
   const isHttpPage = window.location.protocol === "http:" || window.location.protocol === "https:";
 
   if (!isHttpPage) {
@@ -199,11 +202,36 @@ async function fetchGmbEta(config) {
     throw error;
   }
 
+  const variants =
+    config.variants ||
+    [
+      {
+        routeId: config.routeId,
+        routeSeq: config.routeSeq,
+        stopSeq: config.stopSeq,
+        stopId: config.stopId,
+      },
+    ];
+  const results = await Promise.allSettled(variants.map((variant) => fetchGmbVariant(config, variant)));
+  const successful = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+
+  if (successful.length === 0) {
+    const failed = results.find((result) => result.status === "rejected");
+    if (failed) {
+      throw failed.reason;
+    }
+  }
+
+  return successful;
+}
+
+async function fetchGmbVariant(config, variant) {
+  const path = `/api/gmb/eta/route-stop/${variant.routeId}/${variant.routeSeq}/${variant.stopSeq}`;
   const url = path;
   const response = await fetch(url, { cache: "no-store" });
 
   if (!response.ok) {
-    throw new Error(`${config.route} ${config.stopCode} ETA failed with ${response.status}`);
+    throw new Error(`${config.route} ${config.stopCode} ETA ${variant.routeId} failed with ${response.status}`);
   }
 
   const payload = await response.json();
@@ -217,6 +245,9 @@ async function fetchGmbEta(config) {
     rmk_tc: item.remarks_tc,
     rmk_en: item.remarks_en,
     stop_id: payload.data?.stop_id,
+    route_id: variant.routeId,
+    variantLabel: variant.variantLabel,
+    variantClass: variant.variantClass,
   }));
 }
 
@@ -236,7 +267,7 @@ function normalizeEta(config, items, now = new Date()) {
   for (const item of upcoming) {
     const duplicate = unique.find((existing) => {
       const closeInTime = Math.abs(existing.etaDate - item.etaDate) < 90_000;
-      return closeInTime && existing.route === item.route;
+      return closeInTime && existing.route === item.route && existing.variantClass === item.variantClass;
     });
 
     if (!duplicate) {
@@ -278,12 +309,19 @@ function renderEta(panel, items) {
       const row = document.createElement("article");
       const minutes = formatMinutes(item.etaDate, now);
       const remark = item.rmk_sc || item.rmk_tc || "";
+      const variantClass = item.variantClass ? ` eta-row--${item.variantClass}` : "";
+      const variantBadge = item.variantLabel
+        ? `<span class="eta-badge eta-badge--${item.variantClass}">${item.variantLabel}</span>`
+        : "";
 
-      row.className = "eta-row";
+      row.className = `eta-row${variantClass}`;
       row.innerHTML = `
         <div class="eta-minutes">${minutes.value}<small>${minutes.unit}</small></div>
         <div class="eta-time">
-          <strong>${formatClock(item.etaDate)}</strong>
+          <div class="eta-meta">
+            <strong>${formatClock(item.etaDate)}</strong>
+            ${variantBadge}
+          </div>
           <span>${remark || "实时预计"}</span>
         </div>
       `;
