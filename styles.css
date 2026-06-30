@@ -386,8 +386,21 @@ p {
 .departure-option-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(132px, 0.9fr);
-  align-items: start;
+  align-items: end;
   gap: 10px;
+}
+
+.departure-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.departure-plan-label {
+  color: var(--accent);
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1.2;
 }
 
 .departure-origin {
@@ -399,6 +412,8 @@ p {
 }
 
 .departure-boarding {
+  display: grid;
+  gap: 2px;
   min-width: 0;
   color: var(--muted);
   font-size: 14px;

@@ -745,12 +745,15 @@ function renderDepartureOption(candidate, index) {
   return `
     <article class="departure-option">
       <div class="departure-option-top">
-        <p class="recommendation-label">${title}</p>
+        <div class="departure-copy">
+          <p class="departure-plan-label">${title}</p>
+          <strong class="departure-origin">${formatClock(departureTime)} 出门 ${config.stopLabel}${config.stopCode}</strong>
+        </div>
         <p class="departure-boarding">
-          ${formatClock(item.etaDate)} 乘坐 <strong>${config.route}</strong>${badge ? ` ${badge}` : ""}，${remark}
+          <span>${formatClock(item.etaDate)} 乘坐 <strong>${config.route}</strong>${badge ? ` ${badge}` : ""}</span>
+          <span>${remark}</span>
         </p>
       </div>
-      <strong class="departure-origin">${formatClock(departureTime)} 出门 ${config.stopLabel} ${config.stopCode}</strong>
     </article>
   `;
 }
