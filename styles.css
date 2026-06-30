@@ -383,14 +383,15 @@ p {
   line-height: 1.35;
 }
 
-.departure-option-plan {
+.departure-option-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(132px, 0.9fr);
-  align-items: end;
+  align-items: start;
   gap: 10px;
 }
 
 .departure-origin {
+  display: block;
   min-width: 0;
   font-size: 17px;
   font-weight: 850;
@@ -398,8 +399,6 @@ p {
 }
 
 .departure-boarding {
-  display: grid;
-  gap: 2px;
   min-width: 0;
   color: var(--muted);
   font-size: 14px;

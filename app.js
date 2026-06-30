@@ -660,7 +660,7 @@ function renderTransferRecommendation(recommended, stationResults) {
         <div class="recommendation-route">
           <strong>${recommended.config.route}</strong>
           ${badge}
-          <span>${formatClock(recommended.item.etaDate)}</span>
+          <span>${formatClock(recommended.item.etaDate)}发车</span>
         </div>
       </div>
       <div class="recommendation-context">
@@ -744,14 +744,13 @@ function renderDepartureOption(candidate, index) {
 
   return `
     <article class="departure-option">
-      <p class="recommendation-label">${title}</p>
-      <div class="departure-option-plan">
-        <strong class="departure-origin">${formatClock(departureTime)} 出门 ${config.stopLabel} ${config.stopCode}</strong>
+      <div class="departure-option-top">
+        <p class="recommendation-label">${title}</p>
         <p class="departure-boarding">
-          <span>${formatClock(item.etaDate)} 乘坐 <strong>${config.route}</strong> ${badge}</span>
-          <span>${remark}</span>
+          ${formatClock(item.etaDate)} 乘坐 <strong>${config.route}</strong>${badge ? ` ${badge}` : ""}，${remark}
         </p>
       </div>
+      <strong class="departure-origin">${formatClock(departureTime)} 出门 ${config.stopLabel} ${config.stopCode}</strong>
     </article>
   `;
 }
