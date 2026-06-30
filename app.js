@@ -349,12 +349,8 @@ function createCommuteGroup(group) {
   const section = document.createElement("section");
   section.className = "commute-group";
   section.dataset.commuteGroup = group.id;
-  section.setAttribute("aria-labelledby", `${group.id}-title`);
+  section.setAttribute("aria-label", group.title);
   section.innerHTML = `
-    <header class="group-heading">
-      <p class="group-kicker">${group.title}</p>
-      <h2 class="group-title" id="${group.id}-title">${group.subtitle}</h2>
-    </header>
     <div class="stops-stack" data-group-stops></div>
   `;
   stopsRoot.appendChild(section);
@@ -658,7 +654,9 @@ function renderTransferRecommendation(recommended, stationResults) {
   transferAdvisorElements.result.innerHTML = `
     <div class="recommendation-main recommendation-main--split">
       <div class="recommendation-primary">
-        <p class="recommendation-label">推荐 <strong>${recommended.stationLabel}</strong> 下车</p>
+        <p class="recommendation-label recommendation-label--transfer">
+          <span>推荐</span><strong>${recommended.stationLabel}</strong><span>下车</span>
+        </p>
         <div class="recommendation-route">
           <strong>${recommended.config.route}</strong>
           ${badge}
@@ -747,13 +745,15 @@ function renderDepartureOption(candidate, index) {
   return `
     <article class="departure-option">
       <p class="recommendation-label">${title}</p>
-      <div class="recommendation-route">
-        <strong>${formatClock(departureTime)} 出门</strong>
-        <span>${config.stopLabel} ${config.stopCode}</span>
+      <div class="departure-option-plan">
+        <div class="departure-origin">
+          <strong>${formatClock(departureTime)} 出门 ${config.stopLabel}</strong>
+          <span>${config.stopCode}</span>
+        </div>
+        <p class="departure-boarding">
+          ${formatClock(item.etaDate)} 乘坐 ${config.route} ${badge}，${remark}
+        </p>
       </div>
-      <p class="recommendation-detail">
-        ${formatClock(item.etaDate)} 乘坐 ${config.route} ${badge}，${remark}
-      </p>
     </article>
   `;
 }
