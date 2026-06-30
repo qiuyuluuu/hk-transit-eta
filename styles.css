@@ -126,6 +126,124 @@ h1 {
   overflow: hidden;
 }
 
+.transfer-advisor {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 18px 45px rgba(29, 39, 36, 0.08);
+  overflow: hidden;
+}
+
+.transfer-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.transfer-kicker {
+  margin-bottom: 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.transfer-title {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.transfer-rule {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: rgba(55, 107, 155, 0.1);
+  color: var(--info);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.position-control {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.position-button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.48);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.position-button.is-selected {
+  border-color: var(--accent);
+  background: rgba(31, 122, 99, 0.1);
+  color: var(--accent);
+}
+
+.transfer-result {
+  padding: 14px 18px 16px;
+}
+
+.recommendation-main {
+  display: grid;
+  gap: 8px;
+}
+
+.recommendation-label {
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.recommendation-route {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  font-size: 16px;
+}
+
+.recommendation-route strong {
+  font-size: 24px;
+}
+
+.recommendation-route span:last-child {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.recommendation-detail {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.recommendation-alternatives {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.recommendation-alternatives span {
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: rgba(104, 114, 109, 0.1);
+}
+
 .route-heading {
   display: flex;
   align-items: flex-start;

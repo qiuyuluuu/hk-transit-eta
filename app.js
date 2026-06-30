@@ -183,6 +183,49 @@ const commuteGroups = [
 const routeConfigs = commuteGroups.flatMap((group) => group.routes);
 const stopsRoot = document.querySelector("#stopsRoot");
 const refreshButton = document.querySelector("#refreshButton");
+const transferBufferMinutes = 5;
+const eastRailTravelMinutes = {
+  shaTinToUniversity: 4,
+  betweenToUniversity: 2,
+};
+let selectedTransferPosition = "before-sha-tin";
+let transferAdvisorElements = null;
+
+const transferPositions = [
+  {
+    id: "before-sha-tin",
+    label: "沙田前",
+    arrivals: { shaTin: "mtr", university: "mtr" },
+  },
+  {
+    id: "at-sha-tin",
+    label: "已到沙田",
+    arrivals: { shaTin: "now", university: "mtr" },
+  },
+  {
+    id: "between",
+    label: "沙田-大学",
+    arrivals: { university: "mtr" },
+  },
+  {
+    id: "at-university",
+    label: "已到大学",
+    arrivals: { university: "now" },
+  },
+];
+
+const transferStations = {
+  shaTin: {
+    label: "沙田站",
+    mtrCode: "SHT",
+    routeIds: ["gmb-27a-sha-tin-pai-tau", "gmb-27b-sha-tin-pai-tau"],
+  },
+  university: {
+    label: "大学站",
+    mtrCode: "UNI",
+    routeIds: ["kmb-272a-university-st905", "gmb-27b-university-st905"],
+  },
+};
 
 function sortRoutesByStop(routes) {
   const stopOrder = [];
@@ -201,6 +244,62 @@ function sortRoutesByStop(routes) {
     }))
     .sort((a, b) => a.stopRank - b.stopRank || a.index - b.index)
     .map((item) => item.route);
+}
+
+function createTransferAdvisor(groupRoot) {
+  const panel = document.createElement("section");
+  panel.className = "transfer-advisor";
+  panel.setAttribute("aria-labelledby", "transfer-advisor-title");
+  panel.innerHTML = `
+    <header class="transfer-heading">
+      <div>
+        <p class="transfer-kicker">换乘推荐</p>
+        <h3 class="transfer-title" id="transfer-advisor-title">东铁线回白石角</h3>
+      </div>
+      <span class="transfer-rule">预留 ${transferBufferMinutes} 分钟</span>
+    </header>
+    <div class="position-control" role="group" aria-label="当前位置">
+      ${transferPositions
+        .map(
+          (position) => `
+            <button class="position-button" type="button" data-position="${position.id}" aria-pressed="${position.id === selectedTransferPosition}">
+              ${position.label}
+            </button>
+          `
+        )
+        .join("")}
+    </div>
+    <div class="transfer-result" data-transfer-result>
+      <div class="loading-row">正在计算...</div>
+    </div>
+  `;
+
+  panel.querySelectorAll("[data-position]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedTransferPosition = button.dataset.position;
+      updateTransferPositionButtons();
+      refreshTransferRecommendation();
+    });
+  });
+
+  groupRoot.appendChild(panel);
+  transferAdvisorElements = {
+    panel,
+    result: panel.querySelector("[data-transfer-result]"),
+    buttons: [...panel.querySelectorAll("[data-position]")],
+  };
+}
+
+function updateTransferPositionButtons() {
+  if (!transferAdvisorElements) {
+    return;
+  }
+
+  for (const button of transferAdvisorElements.buttons) {
+    const isSelected = button.dataset.position === selectedTransferPosition;
+    button.classList.toggle("is-selected", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+  }
 }
 
 function createCommuteGroup(group) {
@@ -249,6 +348,10 @@ const panels = new Map();
 
 for (const group of commuteGroups) {
   const groupRoot = createCommuteGroup(group);
+
+  if (group.id === "homebound") {
+    createTransferAdvisor(groupRoot);
+  }
 
   for (const config of sortRoutesByStop(group.routes)) {
     panels.set(config.id, createStopPanel(groupRoot, config));
@@ -325,6 +428,186 @@ async function fetchGmbVariant(config, variant) {
     variantLabel: variant.variantLabel,
     variantClass: variant.variantClass,
   }));
+}
+
+async function fetchMtrNorthboundArrival(stationCode) {
+  const url = `https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=EAL&sta=${stationCode}`;
+  const response = await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`MTR ${stationCode} failed with ${response.status}`);
+  }
+
+  const payload = await response.json();
+  const stationData = payload.data?.[`EAL-${stationCode}`];
+  const trains = stationData?.UP || [];
+  const now = new Date();
+  const nextTrain = trains
+    .filter((train) => train.valid === "Y" && train.time)
+    .map((train) => ({
+      ...train,
+      arrivalDate: parseHongKongDateTime(train.time),
+    }))
+    .filter((train) => Number.isFinite(train.arrivalDate.getTime()))
+    .filter((train) => train.arrivalDate.getTime() >= now.getTime() - 60_000)
+    .sort((a, b) => a.arrivalDate - b.arrivalDate)[0];
+
+  if (!nextTrain) {
+    throw new Error(`No MTR ${stationCode} northbound train`);
+  }
+
+  return nextTrain.arrivalDate;
+}
+
+function parseHongKongDateTime(value) {
+  return new Date(value.replace(" ", "T"));
+}
+
+async function getTransferArrivals() {
+  const position = transferPositions.find((item) => item.id === selectedTransferPosition) || transferPositions[0];
+  const entries = await Promise.all(
+    Object.entries(position.arrivals).map(async ([stationKey, source]) => {
+      if (source === "now") {
+        return [stationKey, new Date()];
+      }
+
+      const station = transferStations[stationKey];
+      return [stationKey, await fetchMtrNorthboundArrival(station.mtrCode)];
+    })
+  );
+
+  const arrivals = Object.fromEntries(entries);
+  const now = new Date();
+  const addMinutes = (date, minutes) => new Date(date.getTime() + minutes * 60_000);
+
+  if (arrivals.shaTin && arrivals.university) {
+    const earliestUniversity = addMinutes(arrivals.shaTin, eastRailTravelMinutes.shaTinToUniversity);
+    if (arrivals.university.getTime() < earliestUniversity.getTime()) {
+      arrivals.university = earliestUniversity;
+    }
+  }
+
+  if (selectedTransferPosition === "at-sha-tin" && arrivals.university) {
+    const earliestUniversity = addMinutes(now, eastRailTravelMinutes.shaTinToUniversity);
+    if (arrivals.university.getTime() < earliestUniversity.getTime()) {
+      arrivals.university = earliestUniversity;
+    }
+  }
+
+  if (selectedTransferPosition === "between" && arrivals.university) {
+    const earliestUniversity = addMinutes(now, eastRailTravelMinutes.betweenToUniversity);
+    if (arrivals.university.getTime() < earliestUniversity.getTime()) {
+      arrivals.university = earliestUniversity;
+    }
+  }
+
+  return arrivals;
+}
+
+async function fetchTransferOptions(stationKey, arrivalDate) {
+  const station = transferStations[stationKey];
+  const readyAt = new Date(arrivalDate.getTime() + transferBufferMinutes * 60_000);
+  const configs = station.routeIds.map((routeId) => routeConfigs.find((config) => config.id === routeId)).filter(Boolean);
+  const results = await Promise.allSettled(
+    configs.map(async (config) => {
+      const items =
+        config.provider === "gmb"
+          ? normalizeEta(config, await fetchGmbEta(config))
+          : normalizeEta(config, (await Promise.all(config.serviceTypes.map((serviceType) => fetchServiceType(config, serviceType)))).flat());
+      return items.map((item) => ({ config, item }));
+    })
+  );
+  const options = results
+    .flatMap((result) => (result.status === "fulfilled" ? result.value : []))
+    .filter(({ item }) => item.etaDate.getTime() >= readyAt.getTime())
+    .map(({ config, item }) => ({
+      stationKey,
+      stationLabel: station.label,
+      config,
+      item,
+      arrivalDate,
+      readyAt,
+      waitMinutes: Math.max(0, Math.ceil((item.etaDate - readyAt) / 60_000)),
+    }))
+    .sort((a, b) => a.waitMinutes - b.waitMinutes || a.item.etaDate - b.item.etaDate);
+
+  return {
+    stationKey,
+    stationLabel: station.label,
+    arrivalDate,
+    readyAt,
+    best: options[0] || null,
+  };
+}
+
+async function refreshTransferRecommendation() {
+  if (!transferAdvisorElements) {
+    return;
+  }
+
+  transferAdvisorElements.result.innerHTML = '<div class="loading-row">正在计算...</div>';
+
+  try {
+    const arrivals = await getTransferArrivals();
+    const stationResults = await Promise.all(
+      Object.entries(arrivals).map(([stationKey, arrivalDate]) => fetchTransferOptions(stationKey, arrivalDate))
+    );
+    const candidates = stationResults.filter((result) => result.best);
+
+    if (candidates.length === 0) {
+      renderTransferUnavailable(stationResults);
+      return;
+    }
+
+    const recommended = candidates
+      .map((result) => result.best)
+      .sort((a, b) => a.waitMinutes - b.waitMinutes || a.item.etaDate - b.item.etaDate)[0];
+    renderTransferRecommendation(recommended, stationResults);
+  } catch (error) {
+    console.error(error);
+    transferAdvisorElements.result.innerHTML = '<div class="error-row">推荐暂不可用</div>';
+  }
+}
+
+function renderTransferRecommendation(recommended, stationResults) {
+  const alternatives = stationResults
+    .map((result) => {
+      if (!result.best) {
+        return `<span>${result.stationLabel}：暂无合适班次</span>`;
+      }
+
+      return `<span>${result.stationLabel}：等 ${result.best.waitMinutes} 分钟</span>`;
+    })
+    .join("");
+  const badge = recommended.item.variantLabel
+    ? `<span class="eta-badge eta-badge--${recommended.item.variantClass}">${recommended.item.variantLabel}</span>`
+    : "";
+
+  transferAdvisorElements.result.innerHTML = `
+    <div class="recommendation-main">
+      <p class="recommendation-label">推荐 ${recommended.stationLabel} 下车</p>
+      <div class="recommendation-route">
+        <strong>${recommended.config.route}</strong>
+        ${badge}
+        <span>${formatClock(recommended.item.etaDate)}</span>
+      </div>
+      <p class="recommendation-detail">
+        ${formatClock(recommended.arrivalDate)} 到站，${formatClock(recommended.readyAt)} 后可换乘，预计等 ${recommended.waitMinutes} 分钟
+      </p>
+    </div>
+    <div class="recommendation-alternatives">${alternatives}</div>
+  `;
+}
+
+function renderTransferUnavailable(stationResults) {
+  const summary = stationResults.map((result) => `<span>${result.stationLabel}：暂无合适班次</span>`).join("");
+  transferAdvisorElements.result.innerHTML = `
+    <div class="recommendation-main">
+      <p class="recommendation-label">暂无推荐</p>
+      <p class="recommendation-detail">按 ${transferBufferMinutes} 分钟换乘时间过滤后，暂时没有合适班次。</p>
+    </div>
+    <div class="recommendation-alternatives">${summary}</div>
+  `;
 }
 
 function normalizeEta(config, items, now = new Date()) {
@@ -433,7 +716,7 @@ async function refreshEta() {
   refreshButton.disabled = true;
 
   try {
-    await Promise.all(routeConfigs.map(refreshStop));
+    await Promise.all([...routeConfigs.map(refreshStop), refreshTransferRecommendation()]);
   } finally {
     refreshButton.classList.remove("is-loading");
     refreshButton.disabled = false;

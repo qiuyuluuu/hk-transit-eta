@@ -50,6 +50,15 @@ curl.exe -s -D - 'https://data.etagmb.gov.hk/eta/route-stop/2007861/1/4' -o NUL
 
 Cloudflare Pages Function 代理请求小巴 API 时必须带 `User-Agent`。上游由 CloudFront 提供服务；如果代理请求没有 `User-Agent`，会返回 `403 Request blocked`。
 
+检查港铁东铁线到站：
+
+```powershell
+curl.exe -s -D - 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=EAL&sta=SHT'
+curl.exe -s -D - 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=EAL&sta=UNI'
+```
+
+应看到 `Access-Control-Allow-Origin: *`，页面可直接从浏览器请求港铁 API。
+
 ## 新增一条九巴查询项
 
 1. 确认用户要看的路线、站点和生活化方向名，例如“往大学站方向”。
