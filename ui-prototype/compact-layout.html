@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>紧凑布局原型</title>
+    <link rel="stylesheet" href="compact-layout.css" />
+  </head>
+  <body>
+    <main class="prototype-shell">
+      <section class="prototype-note" aria-label="原型说明">
+        <p class="note-kicker">UI prototype</p>
+        <h1>白石角 ETA 紧凑布局</h1>
+        <p>静态假数据，仅用于比较信息密度。确认后再迁移到现有程序。</p>
+      </section>
+
+      <section class="phone-grid" aria-label="布局方案">
+        <article class="phone-frame">
+          <header class="variant-header">
+            <div>
+              <p class="note-kicker">方案 A</p>
+              <h2>最高密度</h2>
+            </div>
+            <span>ETA 信息一行化</span>
+          </header>
+
+          <div class="app-view compact-a">
+            <header class="top-bar">
+              <button type="button">刷新</button>
+              <span>更新于 11:13</span>
+            </header>
+
+            <section class="commute-block">
+              <h3><strong>上班</strong><span>往大学、沙田方向</span></h3>
+
+              <section class="hint-panel">
+                <div class="hint-head">
+                  <span>出门建议</span>
+                  <em>预留 5 分钟</em>
+                </div>
+                <div class="advice-row">
+                  <strong>11:18 出门</strong>
+                  <span>逸珑湾 PA150 · 27A</span>
+                  <b class="badge fast">快车</b>
+                  <small>11:23 未开出</small>
+                </div>
+                <div class="advice-row muted">
+                  <strong>11:20 出门</strong>
+                  <span>云汇 PA206 · 272A</span>
+                  <small>11:25 实时预计</small>
+                </div>
+              </section>
+
+              <section class="route-card">
+                <header>
+                  <div>
+                    <p>逸珑湾 <b>PA150</b></p>
+                    <h4>272A <span>往大学站方向</span></h4>
+                  </div>
+                  <i>九巴</i>
+                </header>
+                <div class="eta-grid">
+                  <div class="eta-cell">
+                    <p><strong>2</strong>分钟 <span>11:15</span></p>
+                    <small>实时预计</small>
+                  </div>
+                  <div class="eta-cell">
+                    <p><strong>17</strong>分钟 <span>11:30</span></p>
+                    <small>原定班次</small>
+                  </div>
+                  <div class="eta-cell">
+                    <p><strong>32</strong>分钟 <span>11:45</span></p>
+                    <small>原定班次</small>
+                  </div>
+                </div>
+              </section>
+
+              <section class="route-card">
+                <header>
+                  <div>
+                    <p>逸珑湾 <b>PA150</b></p>
+                    <h4>27A <span>往沙田方向</span></h4>
+                  </div>
+                  <i>小巴</i>
+                </header>
+                <div class="eta-grid">
+                  <div class="eta-cell fast-text">
+                    <p><strong>7</strong>分钟 <span>11:20</span> <b class="badge fast">快车</b></p>
+                    <small>未开出</small>
+                  </div>
+                  <div class="eta-cell slow-text">
+                    <p><strong>7</strong>分钟 <span>11:20</span> <b class="badge slow">慢车</b></p>
+                    <small>未开出</small>
+                  </div>
+                  <div class="eta-cell fast-text">
+                    <p><strong>27</strong>分钟 <span>11:40</span> <b class="badge fast">快车</b></p>
+                    <small>未开出</small>
+                  </div>
+                </div>
+              </section>
+            </section>
+
+            <section class="commute-block">
+              <h3><strong>下班</strong><span>往白石角方向</span></h3>
+              <section class="hint-panel">
+                <div class="hint-head">
+                  <span>换乘推荐</span>
+                  <em>已到大围站</em>
+                </div>
+                <div class="advice-row">
+                  <strong>大学站下车</strong>
+                  <span>27B · 11:42</span>
+                  <b class="badge via">经大学站</b>
+                  <small>预计等 3 分钟</small>
+                </div>
+              </section>
+            </section>
+          </div>
+        </article>
+
+        <article class="phone-frame">
+          <header class="variant-header">
+            <div>
+              <p class="note-kicker">方案 B</p>
+              <h2>平衡密度</h2>
+            </div>
+            <span>更稳的两行 ETA</span>
+          </header>
+
+          <div class="app-view compact-b">
+            <header class="top-bar">
+              <button type="button">刷新</button>
+              <span>更新于 11:13</span>
+            </header>
+
+            <section class="commute-block">
+              <h3><strong>上班</strong><span>往大学、沙田方向</span></h3>
+
+              <section class="hint-panel">
+                <div class="hint-head">
+                  <span>出门建议</span>
+                  <em>预留 5 分钟</em>
+                </div>
+                <div class="advice-card">
+                  <strong>11:18 出门</strong>
+                  <p>逸珑湾 PA150 · 27A · 11:23 <b class="badge fast">快车</b></p>
+                </div>
+                <div class="advice-card secondary">
+                  <strong>11:20 出门</strong>
+                  <p>云汇 PA206 · 272A · 11:25 实时预计</p>
+                </div>
+              </section>
+
+              <section class="route-card">
+                <header>
+                  <div>
+                    <p>逸珑湾 <b>PA150</b></p>
+                    <h4>272A <span>往大学站方向</span></h4>
+                  </div>
+                  <i>九巴</i>
+                </header>
+                <div class="eta-grid">
+                  <div class="eta-cell">
+                    <p><strong>2</strong><small>分钟</small></p>
+                    <span>11:15 · 实时预计</span>
+                  </div>
+                  <div class="eta-cell">
+                    <p><strong>17</strong><small>分钟</small></p>
+                    <span>11:30 · 原定班次</span>
+                  </div>
+                  <div class="eta-cell">
+                    <p><strong>32</strong><small>分钟</small></p>
+                    <span>11:45 · 原定班次</span>
+                  </div>
+                </div>
+              </section>
+
+              <section class="route-card">
+                <header>
+                  <div>
+                    <p>逸珑湾 <b>PA150</b></p>
+                    <h4>27A <span>往沙田方向</span></h4>
+                  </div>
+                  <i>小巴</i>
+                </header>
+                <div class="eta-grid">
+                  <div class="eta-cell fast-text">
+                    <p><strong>7</strong><small>分钟</small></p>
+                    <span>11:20 <b class="badge fast">快车</b> · 未开出</span>
+                  </div>
+                  <div class="eta-cell slow-text">
+                    <p><strong>7</strong><small>分钟</small></p>
+                    <span>11:20 <b class="badge slow">慢车</b> · 未开出</span>
+                  </div>
+                  <div class="eta-cell fast-text">
+                    <p><strong>27</strong><small>分钟</small></p>
+                    <span>11:40 <b class="badge fast">快车</b> · 未开出</span>
+                  </div>
+                </div>
+              </section>
+            </section>
+
+            <section class="commute-block">
+              <h3><strong>下班</strong><span>往白石角方向</span></h3>
+              <section class="hint-panel">
+                <div class="hint-head">
+                  <span>换乘推荐</span>
+                  <em>已到大围站</em>
+                </div>
+                <div class="advice-card">
+                  <strong>大学站下车</strong>
+                  <p>27B · 11:42 <b class="badge via">经大学站</b> · 等 3 分钟</p>
+                </div>
+              </section>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
