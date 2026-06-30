@@ -183,6 +183,7 @@ const commuteGroups = [
 const routeConfigs = commuteGroups.flatMap((group) => group.routes);
 const stopsRoot = document.querySelector("#stopsRoot");
 const refreshButton = document.querySelector("#refreshButton");
+const lastUpdatedAt = document.querySelector("#lastUpdatedAt");
 const departureBufferMinutes = 5;
 const transferBufferMinutes = 5;
 const eastRailTravelMinutes = {
@@ -263,6 +264,26 @@ function sortRoutesByStop(routes) {
     .map((item) => item.route);
 }
 
+function getStopGroupKey(config) {
+  return `${config.stopLabel}|${config.stopCode}`;
+}
+
+function createStopGroup(groupRoot, config) {
+  const stopGroup = document.createElement("section");
+  const stopGroupId = `${config.id}-stop`;
+  stopGroup.className = "stop-group";
+  stopGroup.setAttribute("aria-labelledby", stopGroupId);
+  stopGroup.innerHTML = `
+    <h3 class="stop-group-title" id="${stopGroupId}">
+      <span>${config.stopLabel}</span>
+      <b>${config.stopCode}</b>
+    </h3>
+    <div class="route-stack" data-route-stack></div>
+  `;
+  groupRoot.appendChild(stopGroup);
+  return stopGroup.querySelector("[data-route-stack]");
+}
+
 function createTransferAdvisor(groupRoot) {
   const panel = document.createElement("section");
   panel.className = "transfer-advisor";
@@ -341,7 +362,6 @@ function createStopPanel(groupRoot, config) {
   panel.innerHTML = `
     <div class="route-heading">
       <div>
-        <p class="stop-name">${config.stopLabel} <span class="stop-code">${config.stopCode}</span></p>
         <h2 class="route-title" id="${config.id}-title">${config.route} <span>${config.directionLabel}</span></h2>
       </div>
       <span class="operator">${config.operatorLabel}</span>
@@ -349,11 +369,6 @@ function createStopPanel(groupRoot, config) {
 
     <div class="eta-list" data-eta-list>
       <div class="loading-row">正在更新...</div>
-    </div>
-
-    <div class="status-line">
-      <span data-updated-at>等待更新</span>
-      <span>官方 ETA</span>
     </div>
   `;
   groupRoot.appendChild(panel);
@@ -364,6 +379,7 @@ const panels = new Map();
 
 for (const group of commuteGroups) {
   const groupRoot = createCommuteGroup(group);
+  const stopGroups = new Map();
 
   if (group.id === "workbound") {
     createDepartureAdvisor(groupRoot);
@@ -374,7 +390,11 @@ for (const group of commuteGroups) {
   }
 
   for (const config of sortRoutesByStop(group.routes)) {
-    panels.set(config.id, createStopPanel(groupRoot, config));
+    const stopKey = getStopGroupKey(config);
+    if (!stopGroups.has(stopKey)) {
+      stopGroups.set(stopKey, createStopGroup(groupRoot, config));
+    }
+    panels.set(config.id, createStopPanel(stopGroups.get(stopKey), config));
   }
 }
 
@@ -792,7 +812,6 @@ function renderError(panel, message = "更新失败，稍后再试") {
 
 async function refreshStop(config) {
   const panel = panels.get(config.id);
-  const updatedAt = panel.querySelector("[data-updated-at]");
   try {
     const items =
       config.provider === "gmb"
@@ -800,24 +819,24 @@ async function refreshStop(config) {
         : normalizeEta(config, (await Promise.all(config.serviceTypes.map((serviceType) => fetchServiceType(config, serviceType)))).flat());
     latestEtaByRoute.set(config.id, items);
     renderEta(panel, items);
-    updatedAt.textContent = `更新于 ${formatClock(new Date())}`;
   } catch (error) {
     console.error(error);
     latestEtaByRoute.set(config.id, []);
     renderError(panel, error.userMessage);
-    updatedAt.textContent = "更新失败";
   }
 }
 
 async function refreshEta() {
   refreshButton.classList.add("is-loading");
   refreshButton.disabled = true;
+  lastUpdatedAt.textContent = "正在更新...";
 
   try {
     setDepartureLoading();
     latestEtaByRoute.clear();
     await Promise.all([...routeConfigs.map(refreshStop), refreshTransferRecommendation()]);
     refreshDepartureRecommendation();
+    lastUpdatedAt.textContent = `更新于 ${formatClock(new Date())}`;
   } finally {
     refreshButton.classList.remove("is-loading");
     refreshButton.disabled = false;

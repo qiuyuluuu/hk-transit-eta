@@ -13,13 +13,8 @@
   <body>
     <main class="app-shell">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">白石角</p>
-          <h1>到站时间</h1>
-        </div>
-        <button class="icon-button" id="refreshButton" type="button" aria-label="刷新到站时间" title="刷新">
-          <span aria-hidden="true">↻</span>
-        </button>
+        <button class="refresh-button" id="refreshButton" type="button">刷新</button>
+        <span class="topbar-status" id="lastUpdatedAt">等待更新</span>
       </header>
 
       <div class="commute-groups" id="stopsRoot" aria-live="polite"></div>
