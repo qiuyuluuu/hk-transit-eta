@@ -185,32 +185,22 @@ const stopsRoot = document.querySelector("#stopsRoot");
 const refreshButton = document.querySelector("#refreshButton");
 const transferBufferMinutes = 5;
 const eastRailTravelMinutes = {
-  shaTinToUniversity: 4,
-  betweenToUniversity: 2,
+  taiWaiToShaTin: 3,
+  shaTinToUniversity: 7,
 };
-let selectedTransferPosition = "before-sha-tin";
+let selectedTransferPosition = "at-tai-wai";
 let transferAdvisorElements = null;
 
 const transferPositions = [
   {
-    id: "before-sha-tin",
-    label: "沙田前",
+    id: "at-tai-wai",
+    label: "已到大围站",
     arrivals: { shaTin: "mtr", university: "mtr" },
   },
   {
     id: "at-sha-tin",
-    label: "已到沙田",
+    label: "已到沙田站",
     arrivals: { shaTin: "now", university: "mtr" },
-  },
-  {
-    id: "between",
-    label: "沙田-大学",
-    arrivals: { university: "mtr" },
-  },
-  {
-    id: "at-university",
-    label: "已到大学",
-    arrivals: { university: "now" },
   },
 ];
 
@@ -480,6 +470,13 @@ async function getTransferArrivals() {
   const now = new Date();
   const addMinutes = (date, minutes) => new Date(date.getTime() + minutes * 60_000);
 
+  if (selectedTransferPosition === "at-tai-wai" && arrivals.shaTin) {
+    const earliestShaTin = addMinutes(now, eastRailTravelMinutes.taiWaiToShaTin);
+    if (arrivals.shaTin.getTime() < earliestShaTin.getTime()) {
+      arrivals.shaTin = earliestShaTin;
+    }
+  }
+
   if (arrivals.shaTin && arrivals.university) {
     const earliestUniversity = addMinutes(arrivals.shaTin, eastRailTravelMinutes.shaTinToUniversity);
     if (arrivals.university.getTime() < earliestUniversity.getTime()) {
@@ -489,13 +486,6 @@ async function getTransferArrivals() {
 
   if (selectedTransferPosition === "at-sha-tin" && arrivals.university) {
     const earliestUniversity = addMinutes(now, eastRailTravelMinutes.shaTinToUniversity);
-    if (arrivals.university.getTime() < earliestUniversity.getTime()) {
-      arrivals.university = earliestUniversity;
-    }
-  }
-
-  if (selectedTransferPosition === "between" && arrivals.university) {
-    const earliestUniversity = addMinutes(now, eastRailTravelMinutes.betweenToUniversity);
     if (arrivals.university.getTime() < earliestUniversity.getTime()) {
       arrivals.university = earliestUniversity;
     }
