@@ -386,35 +386,31 @@ p {
 .departure-option-plan {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(132px, 0.9fr);
-  align-items: start;
+  align-items: end;
   gap: 10px;
 }
 
 .departure-origin {
-  display: grid;
-  gap: 2px;
   min-width: 0;
-}
-
-.departure-origin strong {
   font-size: 17px;
+  font-weight: 850;
   line-height: 1.2;
 }
 
-.departure-origin span {
-  color: var(--ink);
-  font-size: 18px;
-  font-weight: 850;
-  line-height: 1.15;
-}
-
 .departure-boarding {
+  display: grid;
+  gap: 2px;
   min-width: 0;
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.35;
   text-align: right;
+}
+
+.departure-boarding strong {
+  color: var(--accent);
+  font-weight: 850;
 }
 
 .recommendation-alternatives {

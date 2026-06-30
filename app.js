@@ -746,12 +746,10 @@ function renderDepartureOption(candidate, index) {
     <article class="departure-option">
       <p class="recommendation-label">${title}</p>
       <div class="departure-option-plan">
-        <div class="departure-origin">
-          <strong>${formatClock(departureTime)} 出门 ${config.stopLabel}</strong>
-          <span>${config.stopCode}</span>
-        </div>
+        <strong class="departure-origin">${formatClock(departureTime)} 出门 ${config.stopLabel} ${config.stopCode}</strong>
         <p class="departure-boarding">
-          ${formatClock(item.etaDate)} 乘坐 ${config.route} ${badge}，${remark}
+          <span>${formatClock(item.etaDate)} 乘坐 <strong>${config.route}</strong> ${badge}</span>
+          <span>${remark}</span>
         </p>
       </div>
     </article>
