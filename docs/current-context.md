@@ -113,11 +113,11 @@ UI 文案：
 - 沙田站
 - 大学站
 
-站点级换乘时间配置位于 `app.js` 的 `transferStations`：
+站点级换乘时间和到家车程估算配置位于 `app.js` 的 `transferStations`：
 
 ```js
-shaTin: { walkMinutes: 4 }
-university: { walkMinutes: 3 }
+shaTin: { walkMinutes: 4, homeTravelMinutes: 16 }
+university: { walkMinutes: 3, homeTravelMinutes: 11 }
 ```
 
 规则：
@@ -125,13 +125,17 @@ university: { walkMinutes: 3 }
 - 沙田站下车默认预留 4 分钟到换乘点
 - 大学站下车默认预留 3 分钟到换乘点
 - 候选条件：`巴士/小巴 ETA >= 东铁到站时间 + 该站 walkMinutes`
-- 推荐等待时间最短的候选
+- 对候选班次加上该站到白石角/逸珑湾一带的 `homeTravelMinutes`
+- 推荐预计到家时间最早的候选
 - 等待时间向上取整显示
 - 大围到沙田至少按约 3 分钟校正
 - 沙田到大学至少按约 7 分钟校正
-- 主推荐文案显示为 `推荐大学站下车` / `推荐沙田站下车`，不在词语之间加空格；`推荐` 和 `下车` 为灰色细体
-- 主推荐内的班次时间显示为 `14:15发车`
+- 主推荐摘要显示为 `推荐 大学站 下车 272A 19:00发车`
+- 摘要内 `推荐` 和 `下车` 为灰色细体，站点、路线和发车时间为强调样式
+- 摘要下方同时显示沙田站和大学站两套方案，包括东铁到站、可换乘时间、等待时间和到家预计；不展开班次信息和来源标记
 - 换乘推荐标题栏右侧同一行显示港铁状态框和 `换乘 3-4 分钟`；实时可用时显示绿色 `港铁实时可用`，若港铁实时到站 API 不可用，则按大围到沙田 3 分钟、沙田到大学 7 分钟估算，并显示红色 `港铁实时不可用，已估算`
+
+参数速查见 `docs/data-sources.md` 的“可调参数速查”，包含出门预留时间、换乘步行时间、东铁兜底时间、到家车程估算、ETA 去重窗口和窄屏断点。
 
 ## 数据源注意事项
 
@@ -163,7 +167,7 @@ university: { walkMinutes: 3 }
 
 ## 最近关键提交
 
-- `本次提交`：换乘推荐加入港铁实时状态框和估算兜底；整理相关文档
+- `本次提交`：换乘推荐改为按预计到家时间推荐；主推荐改成一行摘要，下方并列展示沙田站/大学站两套简化方案；整理相关文档
 - `257c822`：出门建议右侧改为时间/线路两行，隐藏 ETA 备注
 - `815bafa`：避免出门建议站点信息在 iPhone Pro Max 上断行
 - `be8ac4b`：调整出门建议左右信息块的底部对齐
@@ -191,7 +195,7 @@ curl.exe -s -o NUL -w 'GMB_PROXY %{http_code}' '<PRIVATE_DEPLOY_URL>/api/gmb/eta
 1. 在真实 iPhone 上检查上班/下班滑块、27B 隐藏、换乘推荐是否符合使用预期。
 2. 如果 27B 空卡隐藏后站点下没有任何小巴卡片，需要考虑站点组是否也要自动收紧间距或隐藏空站点。
 3. 如果用户希望下次打开保留上班/下班选择，可加入 `localStorage`。
-4. 如果换乘推荐还不够准，优先调 `transferStations.*.walkMinutes`，不要改算法。
+4. 如果换乘推荐还不够准，优先调 `transferStations.*.walkMinutes`、`transferStations.*.homeTravelMinutes` 或 `eastRailTravelMinutes`，不要只改 UI 文案。
 
 开发约束：
 

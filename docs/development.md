@@ -132,8 +132,10 @@ https://data.etagmb.gov.hk/eta/route-stop/{route_id}/{route_seq}/{stop_seq}
 4. 上班出门建议复用现有 ETA 缓存；如果新增上班组路线，确认它是否应进入“最快两班”候选。
 5. 换乘推荐目前使用手动位置选择；如果要自动化用户位置，先评估 iPhone 定位权限、港铁车厢内漂移和误推荐风险。
 6. 港铁实时到站 API 不可用时应保留估算兜底，不要让单次港铁请求失败导致整个换乘推荐不可用。
-7. 如果开始混合更多营运商，给每个营运商拆出独立 fetch/normalize 函数。
-8. 如果需要通知、缓存或隐藏复杂配置，再加 Cloudflare Worker。
+7. 换乘推荐按预计到家时间排序；调整沙田站/大学站优先级时，先检查 `transferStations.*.walkMinutes`、`homeTravelMinutes` 和 `eastRailTravelMinutes`，不要只改 UI 文案。
+8. 两站方案保持简化展示，不展开具体班次、线路和来源标记；主推荐摘要保持一行横向信息。
+9. 如果开始混合更多营运商，给每个营运商拆出独立 fetch/normalize 函数。
+10. 如果需要通知、缓存或隐藏复杂配置，再加 Cloudflare Worker。
 
 ## 文案约定
 

@@ -215,12 +215,14 @@ const transferStations = {
     label: "沙田站",
     mtrCode: "SHT",
     walkMinutes: 4,
+    homeTravelMinutes: 16,
     routeIds: ["gmb-27a-sha-tin-pai-tau", "gmb-27b-sha-tin-pai-tau"],
   },
   university: {
     label: "大学站",
     mtrCode: "UNI",
     walkMinutes: 3,
+    homeTravelMinutes: 11,
     routeIds: ["kmb-272a-university-st905", "gmb-27b-university-st905"],
   },
 };
@@ -534,8 +536,6 @@ function parseHongKongDateTime(value) {
 }
 
 function estimateTransferArrival(stationKey, now = new Date()) {
-  const addMinutes = (date, minutes) => new Date(date.getTime() + minutes * 60_000);
-
   if (selectedTransferPosition === "at-sha-tin") {
     return stationKey === "university" ? addMinutes(now, eastRailTravelMinutes.shaTinToUniversity) : now;
   }
@@ -545,6 +545,10 @@ function estimateTransferArrival(stationKey, now = new Date()) {
   }
 
   return addMinutes(now, eastRailTravelMinutes.taiWaiToShaTin);
+}
+
+function addMinutes(date, minutes) {
+  return new Date(date.getTime() + minutes * 60_000);
 }
 
 async function getTransferArrivals() {
@@ -569,8 +573,6 @@ async function getTransferArrivals() {
   );
 
   const arrivals = Object.fromEntries(entries);
-  const addMinutes = (date, minutes) => new Date(date.getTime() + minutes * 60_000);
-
   if (selectedTransferPosition === "at-tai-wai" && arrivals.shaTin) {
     const earliestShaTin = addMinutes(now, eastRailTravelMinutes.taiWaiToShaTin);
     if (arrivals.shaTin.getTime() < earliestShaTin.getTime()) {
@@ -615,20 +617,24 @@ async function fetchTransferOptions(stationKey, arrivalDate) {
       stationKey,
       stationLabel: station.label,
       walkMinutes: station.walkMinutes,
+      homeTravelMinutes: station.homeTravelMinutes,
       config,
       item,
       arrivalDate,
       readyAt,
       waitMinutes: Math.max(0, Math.ceil((item.etaDate - readyAt) / 60_000)),
+      homeArrivalDate: addMinutes(item.etaDate, station.homeTravelMinutes),
     }))
-    .sort((a, b) => a.waitMinutes - b.waitMinutes || a.item.etaDate - b.item.etaDate);
+    .sort((a, b) => a.homeArrivalDate - b.homeArrivalDate || a.waitMinutes - b.waitMinutes || a.item.etaDate - b.item.etaDate);
 
   return {
     stationKey,
     stationLabel: station.label,
     walkMinutes: station.walkMinutes,
+    homeTravelMinutes: station.homeTravelMinutes,
     arrivalDate,
     readyAt,
+    options,
     best: options[0] || null,
   };
 }
@@ -656,7 +662,7 @@ async function refreshTransferRecommendation() {
 
     const recommended = candidates
       .map((result) => result.best)
-      .sort((a, b) => a.waitMinutes - b.waitMinutes || a.item.etaDate - b.item.etaDate)[0];
+      .sort((a, b) => a.homeArrivalDate - b.homeArrivalDate || a.waitMinutes - b.waitMinutes || a.item.etaDate - b.item.etaDate)[0];
     renderTransferRecommendation(recommended, stationResults);
   } catch (error) {
     console.error(error);
@@ -682,52 +688,68 @@ function updateMtrRealtimeStatus(isMtrRealtimeAvailable) {
 }
 
 function renderTransferRecommendation(recommended, stationResults) {
-  const alternatives = stationResults
+  const plans = stationResults
     .map((result) => {
       if (!result.best) {
-        return `<span>${result.stationLabel}：暂无合适班次</span>`;
+        return `
+          <article class="transfer-plan">
+            <div class="transfer-plan-title">
+              <strong>${result.stationLabel}</strong>
+              <span>暂无合适班次</span>
+            </div>
+          </article>
+        `;
       }
 
-      return `<span>${result.stationLabel}：等 ${result.best.waitMinutes} 分钟</span>`;
+      const plan = result.best;
+      const isRecommended = plan.stationKey === recommended.stationKey;
+
+      return `
+        <article class="transfer-plan${isRecommended ? " is-recommended" : ""}">
+          <div class="transfer-plan-title">
+            <strong>${plan.stationLabel}</strong>
+            ${isRecommended ? "<span>推荐</span>" : ""}
+          </div>
+          <p class="transfer-plan-detail">
+            <span>${formatClock(plan.arrivalDate)} 到站，${formatClock(plan.readyAt)} 后可换乘</span>
+            <span>等 ${plan.waitMinutes} 分钟，到家预计 ${formatClock(plan.homeArrivalDate)}</span>
+          </p>
+        </article>
+      `;
     })
     .join("");
-  const badge = recommended.item.variantLabel
-    ? `<span class="eta-badge eta-badge--${recommended.item.variantClass}">${recommended.item.variantLabel}</span>`
-    : "";
-
   transferAdvisorElements.result.innerHTML = `
-    <div class="recommendation-main recommendation-main--split">
-      <div class="recommendation-primary">
-        <p class="recommendation-label recommendation-label--transfer">
-          <span>推荐</span><strong>${recommended.stationLabel}</strong><span>下车</span>
-        </p>
-        <div class="recommendation-route">
-          <strong>${recommended.config.route}</strong>
-          ${badge}
-          <span>${formatClock(recommended.item.etaDate)}发车</span>
-        </div>
-      </div>
-      <div class="recommendation-context">
-        <p class="recommendation-detail">
-          ${formatClock(recommended.arrivalDate)} 到站，${formatClock(recommended.readyAt)} 后可换乘，预计等 ${recommended.waitMinutes} 分钟
-        </p>
-        <div class="recommendation-alternatives">${alternatives}</div>
-      </div>
+    <div class="recommendation-main recommendation-main--stacked">
+      <p class="recommendation-summary">
+        <span>推荐</span>
+        <strong>${recommended.stationLabel}</strong>
+        <span>下车</span>
+        <strong>${recommended.config.route}</strong>
+        <strong>${formatClock(recommended.item.etaDate)}发车</strong>
+      </p>
+      <div class="transfer-plan-list">${plans}</div>
     </div>
   `;
 }
 
 function renderTransferUnavailable(stationResults) {
-  const summary = stationResults.map((result) => `<span>${result.stationLabel}：暂无合适班次</span>`).join("");
+  const summary = stationResults
+    .map(
+      (result) => `
+        <article class="transfer-plan">
+          <div class="transfer-plan-title">
+            <strong>${result.stationLabel}</strong>
+            <span>暂无合适班次</span>
+          </div>
+        </article>
+      `
+    )
+    .join("");
   transferAdvisorElements.result.innerHTML = `
-    <div class="recommendation-main recommendation-main--split">
-      <div class="recommendation-primary">
-        <p class="recommendation-label">暂无推荐</p>
-      </div>
-      <div class="recommendation-context">
-        <p class="recommendation-detail">按各站换乘时间过滤后，暂时没有合适班次。</p>
-        <div class="recommendation-alternatives">${summary}</div>
-      </div>
+    <div class="recommendation-main recommendation-main--stacked">
+      <p class="recommendation-label">暂无推荐</p>
+      <p class="recommendation-detail">按各站换乘时间过滤后，暂时没有合适班次。</p>
+      <div class="transfer-plan-list">${summary}</div>
     </div>
   `;
 }
