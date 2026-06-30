@@ -75,6 +75,49 @@ p {
   font-weight: 800;
 }
 
+.view-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin-bottom: 18px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.view-switch::before {
+  content: "";
+  position: absolute;
+  inset: 4px auto 4px 4px;
+  width: calc(50% - 4px);
+  border-radius: 6px;
+  background: var(--accent);
+  box-shadow: 0 8px 18px rgba(29, 39, 36, 0.12);
+  transition: transform 0.18s ease;
+}
+
+.view-switch[data-active-view="homebound"]::before {
+  transform: translateX(100%);
+}
+
+.view-switch-button {
+  position: relative;
+  z-index: 1;
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.view-switch-button.is-active {
+  color: var(--accent-ink);
+}
+
 .commute-groups {
   display: grid;
   gap: 24px;

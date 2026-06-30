@@ -184,13 +184,15 @@ const routeConfigs = commuteGroups.flatMap((group) => group.routes);
 const stopsRoot = document.querySelector("#stopsRoot");
 const refreshButton = document.querySelector("#refreshButton");
 const lastUpdatedAt = document.querySelector("#lastUpdatedAt");
+const viewSwitch = document.querySelector(".view-switch");
+const viewSwitchButtons = [...document.querySelectorAll("[data-view]")];
 const departureBufferMinutes = 5;
-const transferBufferMinutes = 5;
 const eastRailTravelMinutes = {
   taiWaiToShaTin: 3,
   shaTinToUniversity: 7,
 };
 let departureAdvisorElements = null;
+let activeCommuteView = "workbound";
 let selectedTransferPosition = "at-tai-wai";
 let transferAdvisorElements = null;
 const latestEtaByRoute = new Map();
@@ -212,11 +214,13 @@ const transferStations = {
   shaTin: {
     label: "沙田站",
     mtrCode: "SHT",
+    walkMinutes: 4,
     routeIds: ["gmb-27a-sha-tin-pai-tau", "gmb-27b-sha-tin-pai-tau"],
   },
   university: {
     label: "大学站",
     mtrCode: "UNI",
+    walkMinutes: 3,
     routeIds: ["kmb-272a-university-st905", "gmb-27b-university-st905"],
   },
 };
@@ -293,7 +297,7 @@ function createTransferAdvisor(groupRoot) {
       <div>
         <p class="transfer-kicker">换乘推荐</p>
       </div>
-      <span class="transfer-rule">预留 ${transferBufferMinutes} 分钟</span>
+      <span class="transfer-rule">换乘 3-4 分钟</span>
     </header>
     <div class="position-control" role="group" aria-label="当前位置">
       ${transferPositions
@@ -342,6 +346,7 @@ function updateTransferPositionButtons() {
 function createCommuteGroup(group) {
   const section = document.createElement("section");
   section.className = "commute-group";
+  section.dataset.commuteGroup = group.id;
   section.setAttribute("aria-labelledby", `${group.id}-title`);
   section.innerHTML = `
     <header class="group-heading">
@@ -352,6 +357,23 @@ function createCommuteGroup(group) {
   `;
   stopsRoot.appendChild(section);
   return section.querySelector("[data-group-stops]");
+}
+
+function setActiveCommuteView(viewId) {
+  activeCommuteView = viewId;
+  viewSwitch.dataset.activeView = activeCommuteView;
+
+  document.querySelectorAll("[data-commute-group]").forEach((section) => {
+    const isActive = section.dataset.commuteGroup === activeCommuteView;
+    section.classList.toggle("is-active", isActive);
+    section.hidden = !isActive;
+  });
+
+  for (const button of viewSwitchButtons) {
+    const isActive = button.dataset.view === activeCommuteView;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  }
 }
 
 function createStopPanel(groupRoot, config) {
@@ -396,6 +418,12 @@ for (const group of commuteGroups) {
     }
     panels.set(config.id, createStopPanel(stopGroups.get(stopKey), config));
   }
+}
+
+setActiveCommuteView(activeCommuteView);
+
+for (const button of viewSwitchButtons) {
+  button.addEventListener("click", () => setActiveCommuteView(button.dataset.view));
 }
 
 async function fetchServiceType(config, serviceType) {
@@ -546,7 +574,7 @@ async function getTransferArrivals() {
 
 async function fetchTransferOptions(stationKey, arrivalDate) {
   const station = transferStations[stationKey];
-  const readyAt = new Date(arrivalDate.getTime() + transferBufferMinutes * 60_000);
+  const readyAt = new Date(arrivalDate.getTime() + station.walkMinutes * 60_000);
   const configs = station.routeIds.map((routeId) => routeConfigs.find((config) => config.id === routeId)).filter(Boolean);
   const results = await Promise.allSettled(
     configs.map(async (config) => {
@@ -563,6 +591,7 @@ async function fetchTransferOptions(stationKey, arrivalDate) {
     .map(({ config, item }) => ({
       stationKey,
       stationLabel: station.label,
+      walkMinutes: station.walkMinutes,
       config,
       item,
       arrivalDate,
@@ -574,6 +603,7 @@ async function fetchTransferOptions(stationKey, arrivalDate) {
   return {
     stationKey,
     stationLabel: station.label,
+    walkMinutes: station.walkMinutes,
     arrivalDate,
     readyAt,
     best: options[0] || null,
@@ -651,7 +681,7 @@ function renderTransferUnavailable(stationResults) {
         <p class="recommendation-label">暂无推荐</p>
       </div>
       <div class="recommendation-context">
-        <p class="recommendation-detail">按 ${transferBufferMinutes} 分钟换乘时间过滤后，暂时没有合适班次。</p>
+        <p class="recommendation-detail">按各站换乘时间过滤后，暂时没有合适班次。</p>
         <div class="recommendation-alternatives">${summary}</div>
       </div>
     </div>

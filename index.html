@@ -17,6 +17,11 @@
         <span class="topbar-status" id="lastUpdatedAt">等待更新</span>
       </header>
 
+      <nav class="view-switch" aria-label="通勤方向">
+        <button class="view-switch-button is-active" type="button" data-view="workbound" aria-pressed="true">上班</button>
+        <button class="view-switch-button" type="button" data-view="homebound" aria-pressed="false">下班</button>
+      </nav>
+
       <div class="commute-groups" id="stopsRoot" aria-live="polite"></div>
     </main>
 
