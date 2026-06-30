@@ -385,7 +385,7 @@ p {
 
 .departure-option-top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(132px, 0.9fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(108px, 0.55fr);
   align-items: end;
   gap: 10px;
 }
@@ -409,6 +409,7 @@ p {
   font-size: 17px;
   font-weight: 850;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .departure-boarding {
