@@ -1,4 +1,4 @@
-# 开发与维护流程
+﻿# 开发与维护流程
 
 本文记录后续长期开发时的推荐流程。
 
@@ -13,6 +13,14 @@
 - `functions/api/gmb/...`：绿色专线小巴 API 同源代理
 
 没有构建步骤，没有外部依赖。小巴查询需要 Cloudflare Pages Functions 或等价同源代理。
+
+Cloudflare Pages 当前部署方式：
+
+- GitHub 仓库：`qiuyuluuu/hk-transit-eta`
+- 生产分支：`master`
+- 构建命令：留空
+- 构建输出目录：`/`
+- 线上地址：`<PRIVATE_DEPLOY_URL>/`
 
 ## 验证命令
 
@@ -58,6 +66,15 @@ curl.exe -s -D - 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=E
 ```
 
 应看到 `Access-Control-Allow-Origin: *`，页面可直接从浏览器请求港铁 API。
+
+部署后验证线上资源：
+
+```powershell
+curl.exe -s -o NUL -w 'PAGE %{http_code}' '<PRIVATE_DEPLOY_URL>/'
+curl.exe -s -o NUL -w 'GMB_PROXY %{http_code}' '<PRIVATE_DEPLOY_URL>/api/gmb/eta/route-stop/2007861/2/1'
+```
+
+两项都应返回 `200`。如果刚推送后页面还没更新，等 Cloudflare Pages 自动部署完成后再重试。
 
 ## 新增一条九巴查询项
 
@@ -109,10 +126,10 @@ https://data.etagmb.gov.hk/eta/route-stop/{route_id}/{route_seq}/{stop_seq}
 
 ## 推荐演进顺序
 
-1. 先部署并试用当前版本，确认九巴和 27A 合并查询在 iPhone 上稳定显示。
-2. 继续逐条加入用户常用站点/路线。
-3. 当前 `app.js` 已使用 `commuteGroups` 分组配置；新增站点时优先追加到对应分组的 `routes`，不复制整套渲染逻辑。
-4. 27A 已支持多个 `route_id` 变体合并查询；新增或调整变体时，先核对每个方向的实际候车位置，再决定是否标注为 `快车` 或 `慢车`。
+1. 继续逐条加入用户常用站点/路线。
+2. 当前 `app.js` 已使用 `commuteGroups` 分组配置；新增站点时优先追加到对应分组的 `routes`，不复制整套渲染逻辑。
+3. 27A 已支持多个 `route_id` 变体合并查询；新增或调整变体时，先核对每个方向的实际候车位置，再决定是否标注为 `快车` 或 `慢车`。
+4. 换乘推荐目前使用手动位置选择；如果要自动化用户位置，先评估 iPhone 定位权限、港铁车厢内漂移和误推荐风险。
 5. 如果开始混合更多营运商，给每个营运商拆出独立 fetch/normalize 函数。
 6. 如果需要通知、缓存或隐藏复杂配置，再加 Cloudflare Worker。
 
@@ -122,3 +139,10 @@ https://data.etagmb.gov.hk/eta/route-stop/{route_id}/{route_seq}/{stop_seq}
 - 官方繁体站名可以保存在数据资料中，用户界面显示简体。
 - 循环线的官方目的地可能不符合用户视角，页面可使用生活化方向名。
 - 不把“实时预计”和“原定班次”混在一起显示。
+
+## 文档维护约定
+
+- `README.md` 只放项目入口、当前状态和文档地图。
+- `docs/data-sources.md` 记录当前实现需要的 API、字段语义、站点映射和显示规则。
+- `docs/decisions.md` 记录为什么这样做；早期决定如果被后续实现取代，应保留历史但标注“已被后续决策取代”。
+- `pak-shek-kok-transit-notes.md` 和 `hk-transit-query-playbook.md` 作为调研备忘录保留，不作为当前配置的最终依据。

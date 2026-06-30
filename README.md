@@ -64,3 +64,9 @@
 - 新增路线/站点：看 [docs/development.md](docs/development.md)
 - 核对接口和字段：看 [docs/data-sources.md](docs/data-sources.md)
 - 理解为什么这样做：看 [docs/decisions.md](docs/decisions.md)
+
+## 文档分工
+
+当前实现以 `app.js` 为准；结构化配置说明以 [docs/data-sources.md](docs/data-sources.md) 为准；历史决策和取舍原因以 [docs/decisions.md](docs/decisions.md) 为准。
+
+`pak-shek-kok-transit-notes.md` 和 `hk-transit-query-playbook.md` 是前期调研与踩坑备忘录，适合查路线背景、接口经验和站序线索。它们不是当前页面配置的权威来源，新增或修正路线时仍需回到官方 API 和 `docs/data-sources.md` 复核。
