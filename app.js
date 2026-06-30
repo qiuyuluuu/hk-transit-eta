@@ -232,8 +232,10 @@ function createDepartureAdvisor(groupRoot) {
   panel.innerHTML = `
     <header class="transfer-heading">
       <div>
-        <p class="transfer-kicker">出门建议</p>
-        <h3 class="transfer-title" id="departure-advisor-title">预留 ${departureBufferMinutes} 分钟乘车</h3>
+        <p class="transfer-kicker departure-kicker" id="departure-advisor-title">
+          出门建议
+          <span>预留 ${departureBufferMinutes} 分钟乘车</span>
+        </p>
       </div>
       <span class="transfer-rule">最快两班</span>
     </header>
@@ -848,10 +850,12 @@ async function refreshStop(config) {
         ? normalizeEta(config, await fetchGmbEta(config))
         : normalizeEta(config, (await Promise.all(config.serviceTypes.map((serviceType) => fetchServiceType(config, serviceType)))).flat());
     latestEtaByRoute.set(config.id, items);
+    panel.hidden = config.route === "27B" && items.length === 0;
     renderEta(panel, items);
   } catch (error) {
     console.error(error);
     latestEtaByRoute.set(config.id, []);
+    panel.hidden = false;
     renderError(panel, error.userMessage);
   }
 }

@@ -204,7 +204,7 @@ GET /eta/route-stop/{route_id}/{route_seq}/{stop_seq}
 
 ### 27B 已实现站点配置
 
-当前接入 27B `route_id=2007895`，页面统一标注 `经大学站`：
+当前接入 27B `route_id=2007895`，页面统一标注 `经大学站`。如果 27B 返回空 ETA，页面隐藏对应 27B 卡片：
 
 | 页面显示 | 方向 | route_seq | 小巴官方站名 | stop_id | stop_seq | 页面标注 |
 | --- | --- | --- | --- | --- | --- | --- |
