@@ -128,6 +128,10 @@ p {
   gap: 10px;
 }
 
+.commute-group[hidden] {
+  display: none;
+}
+
 .group-heading {
   display: flex;
   align-items: baseline;
