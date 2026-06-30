@@ -385,7 +385,7 @@ p {
 
 .departure-option-top {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(108px, 0.55fr);
+  grid-template-columns: minmax(0, 1fr) minmax(118px, 0.85fr);
   align-items: end;
   gap: 10px;
 }
@@ -426,6 +426,10 @@ p {
 .departure-boarding strong {
   color: var(--accent);
   font-weight: 850;
+}
+
+.departure-route-line {
+  white-space: nowrap;
 }
 
 .recommendation-alternatives {

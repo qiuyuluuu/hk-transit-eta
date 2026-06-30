@@ -737,7 +737,6 @@ function refreshDepartureRecommendation() {
 function renderDepartureOption(candidate, index) {
   const { config, item, departureTime } = candidate;
   const title = index === 0 ? "最快方案" : "第二快方案";
-  const remark = item.rmk_sc || item.rmk_tc || "实时预计";
   const badge = item.variantLabel
     ? `<span class="eta-badge eta-badge--${item.variantClass}">${item.variantLabel}</span>`
     : "";
@@ -747,11 +746,11 @@ function renderDepartureOption(candidate, index) {
       <div class="departure-option-top">
         <div class="departure-copy">
           <p class="departure-plan-label">${title}</p>
-          <strong class="departure-origin">${formatClock(departureTime)} 出门 ${config.stopLabel}${config.stopCode}</strong>
+          <strong class="departure-origin">${formatClock(departureTime)} 出门 ${config.stopLabel}</strong>
         </div>
         <p class="departure-boarding">
-          <span>${formatClock(item.etaDate)} 乘坐 <strong>${config.route}</strong>${badge ? ` ${badge}` : ""}</span>
-          <span>${remark}</span>
+          <span>${formatClock(item.etaDate)} 乘坐</span>
+          <span class="departure-route-line"><strong>${config.route}</strong>${badge ? ` ${badge}` : ""}</span>
         </p>
       </div>
     </article>
