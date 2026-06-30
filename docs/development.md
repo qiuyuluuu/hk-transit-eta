@@ -10,6 +10,7 @@
 - `styles.css`：视觉样式
 - `app.js`：查询、去重、渲染
 - `manifest.webmanifest`：添加到 iPhone 主屏幕的元信息
+- `assets/icons/`：iPhone 主屏幕图标、manifest 图标和 favicon
 - `functions/api/gmb/...`：绿色专线小巴 API 同源代理
 
 没有构建步骤，没有外部依赖。小巴查询需要 Cloudflare Pages Functions 或等价同源代理。
@@ -28,6 +29,13 @@ Cloudflare Pages 当前部署方式：
 
 ```powershell
 & 'C:\Users\Qiuyu\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' --check app.js
+& 'C:\Users\Qiuyu\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' --check functions\api\gmb\eta\route-stop\[routeId]\[routeSeq]\[stopSeq].js
+```
+
+检查 manifest 与图标尺寸：
+
+```powershell
+& 'C:\Users\Qiuyu\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -c "from pathlib import Path; from PIL import Image; import json; json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8')); base=Path('assets')/'icons'; expected={'apple-touch-icon.png':(180,180),'icon-192.png':(192,192),'icon-512.png':(512,512),'favicon-32x32.png':(32,32),'favicon-16x16.png':(16,16),'app-icon-1024.png':(1024,1024)}; assert all((base/name).exists() and Image.open(base/name).size == size for name,size in expected.items()); assert (base/'favicon.ico').exists(); print('manifest and icons ok')"
 ```
 
 实时验证九巴 ETA：

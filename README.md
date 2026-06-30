@@ -35,6 +35,7 @@
 ├─ app.js                             # ETA 查询、合并、渲染逻辑
 ├─ styles.css                         # 页面样式
 ├─ manifest.webmanifest               # 添加到主屏幕所需的 PWA 元信息
+├─ assets/icons/                      # iPhone 主屏幕图标和 favicon 资源
 ├─ functions/                         # Cloudflare Pages Functions，小巴 API 代理
 ├─ pak-shek-kok-transit-notes.md       # 另一个对话整理的路线/站点备忘录
 ├─ pak-shek-kok-transit-routes.json    # 结构化路线/站点参考数据
@@ -53,7 +54,7 @@
 
 ## iPhone 使用方式
 
-长期建议部署到 Cloudflare Pages。部署后在 iPhone Safari 打开网址，再选择“添加到主屏幕”。
+长期建议部署到 Cloudflare Pages。部署后在 iPhone Safari 打开网址，再选择“添加到主屏幕”。主屏幕图标使用 `assets/icons/apple-touch-icon.png`，来源图已裁掉外圈白边并同步生成 favicon 与 manifest 图标。
 
 第一版不需要后端。只有在出现以下需求时再考虑 Cloudflare Worker 或其它服务端：
 

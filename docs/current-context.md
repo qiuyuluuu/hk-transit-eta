@@ -39,6 +39,7 @@ Cloudflare Pages 设置：
 - `app.js`：路线配置、ETA 查询、去重、推荐计算、渲染
 - `functions/api/gmb/eta/route-stop/[routeId]/[routeSeq]/[stopSeq].js`：绿色专线小巴 ETA 代理
 - `manifest.webmanifest`：添加到 iPhone 主屏幕
+- `assets/icons/`：裁掉外圈白边后的 iPhone 主屏幕图标、manifest 图标和 favicon
 
 当前页面交互：
 
@@ -167,6 +168,7 @@ university: { walkMinutes: 3, homeTravelMinutes: 11 }
 
 ## 最近关键提交
 
+- `本次提交`：新增裁边后的 iPhone 主屏幕图标、favicon 和 manifest 图标，并补充上线前图标校验文档
 - `本次提交`：换乘推荐改为按预计到家时间推荐；主推荐改成一行摘要，下方并列展示沙田站/大学站两套简化方案；整理相关文档
 - `257c822`：出门建议右侧改为时间/线路两行，隐藏 ETA 备注
 - `815bafa`：避免出门建议站点信息在 iPhone Pro Max 上断行
@@ -179,6 +181,13 @@ university: { walkMinutes: 3, homeTravelMinutes: 11 }
 
 ```powershell
 & 'C:\Users\Qiuyu\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' --check app.js
+& 'C:\Users\Qiuyu\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' --check functions\api\gmb\eta\route-stop\[routeId]\[routeSeq]\[stopSeq].js
+```
+
+检查 manifest 与图标尺寸：
+
+```powershell
+& 'C:\Users\Qiuyu\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -c "from pathlib import Path; from PIL import Image; import json; json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8')); base=Path('assets')/'icons'; expected={'apple-touch-icon.png':(180,180),'icon-192.png':(192,192),'icon-512.png':(512,512),'favicon-32x32.png':(32,32),'favicon-16x16.png':(16,16),'app-icon-1024.png':(1024,1024)}; assert all((base/name).exists() and Image.open(base/name).size == size for name,size in expected.items()); assert (base/'favicon.ico').exists(); print('manifest and icons ok')"
 ```
 
 部署后检查线上资源：
