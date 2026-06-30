@@ -39,6 +39,7 @@
 ├─ pak-shek-kok-transit-notes.md       # 另一个对话整理的路线/站点备忘录
 ├─ pak-shek-kok-transit-routes.json    # 结构化路线/站点参考数据
 └─ docs/
+   ├─ current-context.md               # 当前上下文与新对话交接入口
    ├─ data-sources.md                  # API 与数据规则
    ├─ development.md                   # 开发、验证、加路线流程
    └─ decisions.md                     # 已确认的产品/技术决定
@@ -63,6 +64,7 @@
 
 ## 后续开发入口
 
+- 新对话继续开发：先看 [docs/current-context.md](docs/current-context.md)
 - 新增路线/站点：看 [docs/development.md](docs/development.md)
 - 核对接口和字段：看 [docs/data-sources.md](docs/data-sources.md)
 - 理解为什么这样做：看 [docs/decisions.md](docs/decisions.md)
