@@ -299,7 +299,10 @@ function createTransferAdvisor(groupRoot) {
       <div>
         <p class="transfer-kicker">换乘推荐</p>
       </div>
-      <span class="transfer-rule">换乘 3-4 分钟</span>
+      <div class="transfer-heading-actions">
+        <span class="mtr-status-badge" data-mtr-status hidden></span>
+        <span class="transfer-rule">换乘 3-4 分钟</span>
+      </div>
     </header>
     <div class="position-control" role="group" aria-label="当前位置">
       ${transferPositions
@@ -329,6 +332,7 @@ function createTransferAdvisor(groupRoot) {
   transferAdvisorElements = {
     panel,
     result: panel.querySelector("[data-transfer-result]"),
+    mtrStatus: panel.querySelector("[data-mtr-status]"),
     buttons: [...panel.querySelectorAll("[data-position]")],
   };
 }
@@ -529,21 +533,42 @@ function parseHongKongDateTime(value) {
   return new Date(value.replace(" ", "T"));
 }
 
+function estimateTransferArrival(stationKey, now = new Date()) {
+  const addMinutes = (date, minutes) => new Date(date.getTime() + minutes * 60_000);
+
+  if (selectedTransferPosition === "at-sha-tin") {
+    return stationKey === "university" ? addMinutes(now, eastRailTravelMinutes.shaTinToUniversity) : now;
+  }
+
+  if (stationKey === "university") {
+    return addMinutes(now, eastRailTravelMinutes.taiWaiToShaTin + eastRailTravelMinutes.shaTinToUniversity);
+  }
+
+  return addMinutes(now, eastRailTravelMinutes.taiWaiToShaTin);
+}
+
 async function getTransferArrivals() {
   const position = transferPositions.find((item) => item.id === selectedTransferPosition) || transferPositions[0];
+  const now = new Date();
+  let isMtrRealtimeAvailable = true;
   const entries = await Promise.all(
     Object.entries(position.arrivals).map(async ([stationKey, source]) => {
       if (source === "now") {
         return [stationKey, new Date()];
       }
 
-      const station = transferStations[stationKey];
-      return [stationKey, await fetchMtrNorthboundArrival(station.mtrCode)];
+      try {
+        const station = transferStations[stationKey];
+        return [stationKey, await fetchMtrNorthboundArrival(station.mtrCode)];
+      } catch (error) {
+        console.warn(error);
+        isMtrRealtimeAvailable = false;
+        return [stationKey, estimateTransferArrival(stationKey, now)];
+      }
     })
   );
 
   const arrivals = Object.fromEntries(entries);
-  const now = new Date();
   const addMinutes = (date, minutes) => new Date(date.getTime() + minutes * 60_000);
 
   if (selectedTransferPosition === "at-tai-wai" && arrivals.shaTin) {
@@ -567,7 +592,7 @@ async function getTransferArrivals() {
     }
   }
 
-  return arrivals;
+  return { arrivals, isMtrRealtimeAvailable };
 }
 
 async function fetchTransferOptions(stationKey, arrivalDate) {
@@ -614,9 +639,11 @@ async function refreshTransferRecommendation() {
   }
 
   transferAdvisorElements.result.innerHTML = '<div class="loading-row">正在计算...</div>';
+  updateMtrRealtimeStatus(null);
 
   try {
-    const arrivals = await getTransferArrivals();
+    const { arrivals, isMtrRealtimeAvailable } = await getTransferArrivals();
+    updateMtrRealtimeStatus(isMtrRealtimeAvailable);
     const stationResults = await Promise.all(
       Object.entries(arrivals).map(([stationKey, arrivalDate]) => fetchTransferOptions(stationKey, arrivalDate))
     );
@@ -635,6 +662,23 @@ async function refreshTransferRecommendation() {
     console.error(error);
     transferAdvisorElements.result.innerHTML = '<div class="error-row">推荐暂不可用</div>';
   }
+}
+
+function updateMtrRealtimeStatus(isMtrRealtimeAvailable) {
+  if (!transferAdvisorElements?.mtrStatus) {
+    return;
+  }
+
+  const status = transferAdvisorElements.mtrStatus;
+  if (isMtrRealtimeAvailable === null) {
+    status.hidden = true;
+    return;
+  }
+
+  status.hidden = false;
+  status.textContent = isMtrRealtimeAvailable ? "港铁实时可用" : "港铁实时不可用，已估算";
+  status.classList.toggle("is-ok", isMtrRealtimeAvailable);
+  status.classList.toggle("is-warn", !isMtrRealtimeAvailable);
 }
 
 function renderTransferRecommendation(recommended, stationResults) {

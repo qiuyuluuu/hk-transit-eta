@@ -251,6 +251,39 @@ p {
   font-size: 16px;
 }
 
+.transfer-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.mtr-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.mtr-status-badge.is-ok {
+  border-color: rgba(31, 122, 99, 0.3);
+  background: rgba(31, 122, 99, 0.1);
+  color: var(--accent);
+}
+
+.mtr-status-badge.is-warn {
+  border-color: rgba(143, 49, 49, 0.28);
+  background: rgba(143, 49, 49, 0.1);
+  color: #8f3131;
+}
+
 .transfer-title {
   margin: 0;
   font-size: 21px;
