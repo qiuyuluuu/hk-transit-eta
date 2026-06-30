@@ -143,11 +143,21 @@ h1 {
   border-bottom: 1px solid var(--line);
 }
 
+.transfer-advisor:not(.departure-advisor) .transfer-heading {
+  align-items: center;
+  padding-bottom: 14px;
+}
+
 .transfer-kicker {
   margin-bottom: 4px;
   color: var(--accent);
   font-size: 13px;
   font-weight: 800;
+}
+
+.transfer-advisor:not(.departure-advisor) .transfer-kicker {
+  margin-bottom: 0;
+  font-size: 16px;
 }
 
 .transfer-title {
@@ -218,10 +228,31 @@ h1 {
   gap: 8px;
 }
 
+.recommendation-main--split {
+  grid-template-columns: minmax(138px, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.recommendation-primary,
+.recommendation-context {
+  min-width: 0;
+}
+
+.recommendation-context {
+  display: grid;
+  gap: 8px;
+}
+
 .recommendation-label {
   color: var(--accent);
   font-size: 20px;
   font-weight: 850;
+  line-height: 1.2;
+}
+
+.recommendation-label strong {
+  font-size: 22px;
 }
 
 .recommendation-route {
@@ -229,6 +260,7 @@ h1 {
   flex-wrap: wrap;
   align-items: center;
   gap: 7px;
+  margin-top: 8px;
   font-size: 16px;
 }
 
@@ -251,7 +283,6 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
   color: var(--muted);
   font-size: 13px;
 }
@@ -486,5 +517,14 @@ h1 {
 
   .eta-time strong {
     font-size: 16px;
+  }
+
+  .recommendation-main--split {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .recommendation-route {
+    margin-top: 6px;
   }
 }

@@ -266,12 +266,11 @@ function sortRoutesByStop(routes) {
 function createTransferAdvisor(groupRoot) {
   const panel = document.createElement("section");
   panel.className = "transfer-advisor";
-  panel.setAttribute("aria-labelledby", "transfer-advisor-title");
+  panel.setAttribute("aria-label", "换乘推荐");
   panel.innerHTML = `
     <header class="transfer-heading">
       <div>
         <p class="transfer-kicker">换乘推荐</p>
-        <h3 class="transfer-title" id="transfer-advisor-title">东铁线回白石角</h3>
       </div>
       <span class="transfer-rule">预留 ${transferBufferMinutes} 分钟</span>
     </header>
@@ -605,29 +604,37 @@ function renderTransferRecommendation(recommended, stationResults) {
     : "";
 
   transferAdvisorElements.result.innerHTML = `
-    <div class="recommendation-main">
-      <p class="recommendation-label">推荐 ${recommended.stationLabel} 下车</p>
-      <div class="recommendation-route">
-        <strong>${recommended.config.route}</strong>
-        ${badge}
-        <span>${formatClock(recommended.item.etaDate)}</span>
+    <div class="recommendation-main recommendation-main--split">
+      <div class="recommendation-primary">
+        <p class="recommendation-label">推荐 <strong>${recommended.stationLabel}</strong> 下车</p>
+        <div class="recommendation-route">
+          <strong>${recommended.config.route}</strong>
+          ${badge}
+          <span>${formatClock(recommended.item.etaDate)}</span>
+        </div>
       </div>
-      <p class="recommendation-detail">
-        ${formatClock(recommended.arrivalDate)} 到站，${formatClock(recommended.readyAt)} 后可换乘，预计等 ${recommended.waitMinutes} 分钟
-      </p>
+      <div class="recommendation-context">
+        <p class="recommendation-detail">
+          ${formatClock(recommended.arrivalDate)} 到站，${formatClock(recommended.readyAt)} 后可换乘，预计等 ${recommended.waitMinutes} 分钟
+        </p>
+        <div class="recommendation-alternatives">${alternatives}</div>
+      </div>
     </div>
-    <div class="recommendation-alternatives">${alternatives}</div>
   `;
 }
 
 function renderTransferUnavailable(stationResults) {
   const summary = stationResults.map((result) => `<span>${result.stationLabel}：暂无合适班次</span>`).join("");
   transferAdvisorElements.result.innerHTML = `
-    <div class="recommendation-main">
-      <p class="recommendation-label">暂无推荐</p>
-      <p class="recommendation-detail">按 ${transferBufferMinutes} 分钟换乘时间过滤后，暂时没有合适班次。</p>
+    <div class="recommendation-main recommendation-main--split">
+      <div class="recommendation-primary">
+        <p class="recommendation-label">暂无推荐</p>
+      </div>
+      <div class="recommendation-context">
+        <p class="recommendation-detail">按 ${transferBufferMinutes} 分钟换乘时间过滤后，暂时没有合适班次。</p>
+        <div class="recommendation-alternatives">${summary}</div>
+      </div>
     </div>
-    <div class="recommendation-alternatives">${summary}</div>
   `;
 }
 
