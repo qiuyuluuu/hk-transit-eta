@@ -1,0 +1,308 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f5ef;
+  --ink: #1d2724;
+  --muted: #68726d;
+  --line: #d8d4c8;
+  --panel: #fffdf8;
+  --accent: #1f7a63;
+  --accent-ink: #effaf6;
+  --warn: #8f5a13;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(31, 122, 99, 0.08), transparent 240px),
+    var(--bg);
+  color: var(--ink);
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(100%, 560px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: max(18px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 2px 18px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1;
+  box-shadow: 0 10px 24px rgba(29, 39, 36, 0.08);
+}
+
+.icon-button:active {
+  transform: translateY(1px);
+}
+
+.icon-button.is-loading span {
+  animation: spin 0.9s linear infinite;
+}
+
+.commute-groups {
+  display: grid;
+  gap: 24px;
+}
+
+.commute-group {
+  display: grid;
+  gap: 10px;
+}
+
+.group-heading {
+  padding: 0 2px;
+}
+
+.group-kicker {
+  margin-bottom: 4px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.group-title {
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.stops-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.stop-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 18px 45px rgba(29, 39, 36, 0.08);
+  overflow: hidden;
+}
+
+.route-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stop-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.stop-code {
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(31, 122, 99, 0.08);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.route-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.route-title span {
+  color: var(--muted);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.operator {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.eta-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.eta-row,
+.loading-row,
+.empty-row,
+.error-row {
+  min-height: 112px;
+  padding: 14px 12px;
+}
+
+.eta-row {
+  display: grid;
+  align-content: center;
+  gap: 9px;
+  border-right: 1px solid var(--line);
+}
+
+.eta-row:last-child {
+  border-right: 0;
+}
+
+.loading-row,
+.empty-row,
+.error-row {
+  grid-column: 1 / -1;
+}
+
+.eta-minutes {
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.eta-minutes small {
+  margin-left: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.eta-time {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.eta-time strong {
+  color: var(--ink);
+  font-size: 17px;
+}
+
+.eta-time span {
+  overflow-wrap: anywhere;
+}
+
+.loading-row,
+.empty-row,
+.error-row {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.error-row {
+  color: var(--warn);
+}
+
+.status-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 380px) {
+  .app-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  h1 {
+    font-size: 29px;
+  }
+
+  .group-title {
+    font-size: 22px;
+  }
+
+  .route-title {
+    font-size: 27px;
+  }
+
+  .eta-row {
+    min-height: 104px;
+    padding: 12px 8px;
+  }
+
+  .eta-minutes {
+    font-size: 23px;
+  }
+
+  .eta-minutes small,
+  .eta-time {
+    font-size: 12px;
+  }
+
+  .eta-time strong {
+    font-size: 16px;
+  }
+}

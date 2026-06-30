@@ -1,0 +1,10 @@
+{
+  "name": "白石角巴士",
+  "short_name": "白石角巴士",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f7f5ef",
+  "theme_color": "#f7f5ef",
+  "lang": "zh-Hans",
+  "icons": []
+}

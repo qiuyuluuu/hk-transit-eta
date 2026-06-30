@@ -1,0 +1,227 @@
+{
+  "metadata": {
+    "area": "Pak Shek Kok / Science Park / University Station / Sha Tin Station",
+    "created_at": "2026-06-29",
+    "timezone": "Asia/Hong_Kong",
+    "purpose": "Reference data for developing bus and green minibus ETA lookup services.",
+    "sources": {
+      "kmb_open_data": "https://data.etabus.gov.hk/v1/transport/kmb",
+      "kmb_schedule": "https://search.kmb.hk/KMBWebSite/Function/FunctionRequest.ashx?action=getschedule",
+      "gmb_open_data": "https://data.etagmb.gov.hk",
+      "cross_reference_16seats_27a": "https://www.16seats.net/chi/gmb/gn_27a.html",
+      "cross_reference_16seats_27b": "https://www.16seats.net/chi/gmb/gn_27b.html"
+    }
+  },
+  "api_patterns": {
+    "kmb": {
+      "route": "https://data.etabus.gov.hk/v1/transport/kmb/route/{route}/{bound}/{service_type}",
+      "route_stop": "https://data.etabus.gov.hk/v1/transport/kmb/route-stop/{route}/{bound}/{service_type}",
+      "stop": "https://data.etabus.gov.hk/v1/transport/kmb/stop/{stop_id}",
+      "eta": "https://data.etabus.gov.hk/v1/transport/kmb/eta/{stop_id}/{route}/{service_type}",
+      "schedule": "https://search.kmb.hk/KMBWebSite/Function/FunctionRequest.ashx?action=getschedule&route={route}&bound=1"
+    },
+    "gmb": {
+      "route": "https://data.etagmb.gov.hk/route/NT/{route_code}",
+      "route_stop": "https://data.etagmb.gov.hk/route-stop/{route_id}/{route_seq}",
+      "eta": "https://data.etagmb.gov.hk/eta/route-stop/{route_id}/{route_seq}/{stop_seq}"
+    }
+  },
+  "kmb_routes": [
+    {
+      "route": "272A",
+      "bound": "outbound",
+      "origin_tc": "大學站",
+      "destination_tc": "白石角(循環線)",
+      "notes": [
+        "循環線；官方 inbound 無資料。",
+        "service_type 1 為主循環線；2 為凌晨短程至博研路；3 為清晨白石角往大學站；4 為經科技大道西。"
+      ],
+      "service_types": [
+        {
+          "service_type": 1,
+          "label_tc": "主循環線",
+          "schedule_summary": "大學站約 06:00-00:20 開出，班次約 8-20 分鐘。"
+        },
+        {
+          "service_type": 2,
+          "label_tc": "以博研路為尾站",
+          "schedule_summary": "大學站約 00:40-01:00 開出，20 分鐘一班。"
+        },
+        {
+          "service_type": 3,
+          "label_tc": "白石角往大學站",
+          "schedule_summary": "白石角約 05:20-05:45 開出，25 分鐘一班。"
+        },
+        {
+          "service_type": 4,
+          "label_tc": "經科技大道西",
+          "schedule_summary": "約每日 10:00-17:00 及 19:00 後。"
+        }
+      ],
+      "stops_service_type_1": [
+        {"seq": 1, "stop_id": "9F542D4B6CF41651", "name_tc": "大學站 (ST905)"},
+        {"seq": 2, "stop_id": "739A5DDE0CF1970C", "name_tc": "馬料水公眾碼頭 (PA100)"},
+        {"seq": 3, "stop_id": "9E95343C77BB85E2", "name_tc": "水上活動中心 (PA104)"},
+        {"seq": 4, "stop_id": "F808AF482CCA028E", "name_tc": "香港生物科技研究院 (PA105)"},
+        {"seq": 5, "stop_id": "BE940A2F1B154D6E", "name_tc": "科學園(第一期) (PA120)"},
+        {"seq": 6, "stop_id": "E8F5E085BAEFE100", "name_tc": "科研路 (PA124)"},
+        {"seq": 7, "stop_id": "3313B37BF82AFF18", "name_tc": "雲滙 (PA125)"},
+        {"seq": 8, "stop_id": "F8F0E91589F099CD", "name_tc": "白石角 (PA141)"},
+        {"seq": 9, "stop_id": "5747450359C7907C", "name_tc": "逸瓏灣 (PA150)"},
+        {"seq": 10, "stop_id": "D31420E8C08168FC", "name_tc": "博研路 (PA161)"},
+        {"seq": 11, "stop_id": "3F24CFF9046300D9", "name_tc": "雲滙 (PA206)"},
+        {"seq": 12, "stop_id": "B34F59A0270AEDA4", "name_tc": "創新路 (PA212)"},
+        {"seq": 13, "stop_id": "39E7051B17D302DA", "name_tc": "科研路 (PA214)"},
+        {"seq": 14, "stop_id": "1C6EAAF5F48167F9", "name_tc": "科學園(第一期) (PA219)"},
+        {"seq": 15, "stop_id": "DA9490C24D6E6026", "name_tc": "香港生物科技研究院 (PA230)"},
+        {"seq": 16, "stop_id": "64101F297D3C1C55", "name_tc": "水上活動中心 (PA234)"},
+        {"seq": 17, "stop_id": "5B39CC28607910E4", "name_tc": "馬料水公眾碼頭 (PA237)"},
+        {"seq": 18, "stop_id": "EC5018363D5C45EB", "name_tc": "大學站 (ST900)"}
+      ]
+    },
+    {
+      "route": "272K",
+      "bound": "outbound",
+      "origin_tc": "大學站",
+      "destination_tc": "香港科學園(循環線)",
+      "notes": [
+        "循環線；官方 inbound 無資料。",
+        "主要在早晚及繁忙時段服務。"
+      ],
+      "schedule_summary": "平日 06:30-09:50、16:55-18:52；星期六 06:30-09:50、17:00-18:50；官方時間表未列星期日/公眾假期班次。",
+      "stops_service_type_1": [
+        {"seq": 1, "stop_id": "878A6FDD75689A2D", "name_tc": "大學站 (ST902)"},
+        {"seq": 2, "stop_id": "739A5DDE0CF1970C", "name_tc": "馬料水公眾碼頭 (PA100)"},
+        {"seq": 3, "stop_id": "9E95343C77BB85E2", "name_tc": "水上活動中心 (PA104)"},
+        {"seq": 4, "stop_id": "F808AF482CCA028E", "name_tc": "香港生物科技研究院 (PA105)"},
+        {"seq": 5, "stop_id": "730AEBA1D2D8B20E", "name_tc": "香港科學園 (PA112)"},
+        {"seq": 6, "stop_id": "A9459D38A4A41F36", "name_tc": "香港科學園第三期 (PA115)"},
+        {"seq": 7, "stop_id": "1C6EAAF5F48167F9", "name_tc": "科學園(第一期) (PA219)"},
+        {"seq": 8, "stop_id": "DA9490C24D6E6026", "name_tc": "香港生物科技研究院 (PA230)"},
+        {"seq": 9, "stop_id": "64101F297D3C1C55", "name_tc": "水上活動中心 (PA234)"},
+        {"seq": 10, "stop_id": "5B39CC28607910E4", "name_tc": "馬料水公眾碼頭 (PA237)"},
+        {"seq": 11, "stop_id": "9F542D4B6CF41651", "name_tc": "大學站 (ST905)"}
+      ]
+    }
+  ],
+  "gmb_routes": [
+    {
+      "route_code": "27A",
+      "route_ids": [
+        {
+          "route_id": 2007861,
+          "description_tc": "輔助服務",
+          "schedule_summary": "普通走線；早晚服務，約 12-20 分鐘一班。",
+          "directions": [
+            {
+              "route_seq": 1,
+              "origin_tc": "白石角(天賦海灣)",
+              "destination_tc": "沙田(排頭街)",
+              "stops": [
+                {"stop_seq": 1, "stop_id": 20015841, "name_tc": "白石角(科城路)公共運輸交匯處"},
+                {"stop_seq": 2, "stop_id": 20009112, "name_tc": "創新路, 近溋玥．天賦海灣第二期"},
+                {"stop_seq": 3, "stop_id": 20007092, "name_tc": "科進路天賦海灣(第三期)外"},
+                {"stop_seq": 4, "stop_id": 20007310, "name_tc": "科進路停車灣近DC2431燈柱"},
+                {"stop_seq": 5, "stop_id": 20007094, "name_tc": "創新路, 近雲滙"},
+                {"stop_seq": 6, "stop_id": 20015874, "name_tc": "創新路南行巴士停車灣近BE2989燈柱"},
+                {"stop_seq": 7, "stop_id": 20015842, "name_tc": "科研路, 近朗濤"},
+                {"stop_seq": 8, "stop_id": 20007049, "name_tc": "創新路, 近科學園第三期"},
+                {"stop_seq": 9, "stop_id": 20007047, "name_tc": "創新路, 近科學園第一期"},
+                {"stop_seq": 10, "stop_id": 20002414, "name_tc": "科學園路, 近香港生物科技研究院"},
+                {"stop_seq": 11, "stop_id": 20002415, "name_tc": "科學園路, 水上活動中心外"},
+                {"stop_seq": 12, "stop_id": 20002416, "name_tc": "科學園路, 近馬料水渡輪碼頭"},
+                {"stop_seq": 13, "stop_id": 20015839, "name_tc": "沙田中, 排頭街, 港鐵沙田站外"}
+              ]
+            },
+            {
+              "route_seq": 2,
+              "origin_tc": "沙田(排頭街)",
+              "destination_tc": "白石角(天賦海灣)",
+              "stops": [
+                {"stop_seq": 1, "stop_id": 20015839, "name_tc": "沙田中, 排頭街, 港鐵沙田站外"},
+                {"stop_seq": 2, "stop_id": 20002981, "name_tc": "科學園路, 近香港生物科技研究院"},
+                {"stop_seq": 3, "stop_id": 20007046, "name_tc": "創新路, 近科學園第一期"},
+                {"stop_seq": 4, "stop_id": 20007048, "name_tc": "創新路, 近科學園第三期"},
+                {"stop_seq": 5, "stop_id": 20007050, "name_tc": "科研路, 逸瓏灣8外"},
+                {"stop_seq": 6, "stop_id": 20015842, "name_tc": "科研路東行近GE2327燈柱"},
+                {"stop_seq": 7, "stop_id": 20007095, "name_tc": "創新路, 近雲滙"},
+                {"stop_seq": 8, "stop_id": 20007310, "name_tc": "科進路停車灣近DC2431燈柱"},
+                {"stop_seq": 9, "stop_id": 20007097, "name_tc": "科進路天賦海灣(第二期)外"},
+                {"stop_seq": 10, "stop_id": 20009112, "name_tc": "創新路, 近溋玥．天賦海灣第二期"},
+                {"stop_seq": 11, "stop_id": 20015841, "name_tc": "白石角(科城路)公共運輸交匯處"}
+              ]
+            }
+          ]
+        },
+        {
+          "route_id": 2007862,
+          "description_tc": "輔助服務，經科技大道西",
+          "schedule_summary": "每日 10:00-17:00、19:00-23:00，20 分鐘一班。"
+        },
+        {
+          "route_id": 2007893,
+          "description_tc": "特別班次，經海日灣",
+          "schedule_summary": "約 07:00/09:00-17:00、19:00-20:00，20 分鐘一班。"
+        },
+        {
+          "route_id": 2007894,
+          "description_tc": "特別班次，經海日灣及創新路",
+          "schedule_summary": "17:00-19:00，20 分鐘一班。"
+        }
+      ]
+    },
+    {
+      "route_code": "27B",
+      "route_ids": [
+        {
+          "route_id": 2007895,
+          "description_tc": "輔助服務，經大學站",
+          "schedule_summary": "白石角開 06:45-09:00、17:00-19:05；沙田站開 07:10-08:30、17:05-19:35。",
+          "directions": [
+            {
+              "route_seq": 1,
+              "origin_tc": "白石角(天賦海灣)",
+              "destination_tc": "沙田(排頭街)(經大學站)",
+              "stops": [
+                {"stop_seq": 1, "stop_id": 20015841, "name_tc": "白石角(科城路)公共運輸交匯處"},
+                {"stop_seq": 2, "stop_id": 20009112, "name_tc": "創新路, 近溋玥．天賦海灣第二期"},
+                {"stop_seq": 3, "stop_id": 20015884, "name_tc": "科進路天賦海灣(第三期)外"},
+                {"stop_seq": 4, "stop_id": 20007310, "name_tc": "科進路停車灣近DC2431燈柱"},
+                {"stop_seq": 5, "stop_id": 20007094, "name_tc": "創新路, 近雲滙"},
+                {"stop_seq": 6, "stop_id": 20015874, "name_tc": "創新路南行巴士停車灣近BE2989燈柱"},
+                {"stop_seq": 7, "stop_id": 20007050, "name_tc": "科研路, 逸瓏灣8外"},
+                {"stop_seq": 8, "stop_id": 20015842, "name_tc": "科研路東行近GE2327燈柱"},
+                {"stop_seq": 9, "stop_id": 20007049, "name_tc": "創新路, 近科學園第三期"},
+                {"stop_seq": 10, "stop_id": 20007047, "name_tc": "創新路, 近科學園第一期"},
+                {"stop_seq": 11, "stop_id": 20002414, "name_tc": "科學園路, 近香港生物科技研究院"},
+                {"stop_seq": 12, "stop_id": 20015891, "name_tc": "科學園路, 水上活動中心外"},
+                {"stop_seq": 13, "stop_id": 20002416, "name_tc": "科學園路, 近馬料水渡輪碼頭"},
+                {"stop_seq": 14, "stop_id": 20002275, "name_tc": "港鐵大學站巴士總站"},
+                {"stop_seq": 15, "stop_id": 20015839, "name_tc": "沙田中, 排頭街, 港鐵沙田站外"}
+              ]
+            },
+            {
+              "route_seq": 2,
+              "origin_tc": "沙田(排頭街)(經大學站)",
+              "destination_tc": "白石角(天賦海灣)",
+              "stops": [
+                {"stop_seq": 1, "stop_id": 20015839, "name_tc": "沙田中, 排頭街, 港鐵沙田站外"},
+                {"stop_seq": 2, "stop_id": 20002275, "name_tc": "港鐵大學站巴士總站"},
+                {"stop_seq": 3, "stop_id": 20002981, "name_tc": "科學園路, 近香港生物科技研究院"},
+                {"stop_seq": 4, "stop_id": 20007046, "name_tc": "創新路, 近科學園第一期"},
+                {"stop_seq": 5, "stop_id": 20007048, "name_tc": "創新路, 近科學園第三期"},
+                {"stop_seq": 6, "stop_id": 20007050, "name_tc": "科研路, 逸瓏灣8外"},
+                {"stop_seq": 7, "stop_id": 20015842, "name_tc": "科研路東行近GE2327燈柱"},
+                {"stop_seq": 8, "stop_id": 20007095, "name_tc": "創新路, 近雲滙"},
+                {"stop_seq": 9, "stop_id": 20007310, "name_tc": "科進路停車灣近DC2431燈柱"},
+                {"stop_seq": 10, "stop_id": 20007097, "name_tc": "科進路天賦海灣(第二期)外"},
+                {"stop_seq": 11, "stop_id": 20009019, "name_tc": "創新路, 近溋玥．天賦海灣第二期"},
+                {"stop_seq": 12, "stop_id": 20015841, "name_tc": "白石角(科城路)公共運輸交匯處"}
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
