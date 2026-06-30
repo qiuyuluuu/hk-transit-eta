@@ -106,6 +106,25 @@ const routeConfigs = commuteGroups.flatMap((group) => group.routes);
 const stopsRoot = document.querySelector("#stopsRoot");
 const refreshButton = document.querySelector("#refreshButton");
 
+function sortRoutesByStop(routes) {
+  const stopOrder = [];
+
+  for (const route of routes) {
+    if (!stopOrder.includes(route.stopCode)) {
+      stopOrder.push(route.stopCode);
+    }
+  }
+
+  return routes
+    .map((route, index) => ({
+      route,
+      index,
+      stopRank: stopOrder.indexOf(route.stopCode),
+    }))
+    .sort((a, b) => a.stopRank - b.stopRank || a.index - b.index)
+    .map((item) => item.route);
+}
+
 function createCommuteGroup(group) {
   const section = document.createElement("section");
   section.className = "commute-group";
@@ -153,7 +172,7 @@ const panels = new Map();
 for (const group of commuteGroups) {
   const groupRoot = createCommuteGroup(group);
 
-  for (const config of group.routes) {
+  for (const config of sortRoutesByStop(group.routes)) {
     panels.set(config.id, createStopPanel(groupRoot, config));
   }
 }
