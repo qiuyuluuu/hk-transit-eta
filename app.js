@@ -569,9 +569,7 @@ function renderTransferRecommendation(recommended, stationResults) {
       return `<span>${result.stationLabel}：等 ${result.best.waitMinutes} 分钟</span>`;
     })
     .join("");
-  const badge = recommended.item.variantLabel
-    ? `<span class="eta-badge eta-badge--${recommended.item.variantClass}">${recommended.item.variantLabel}</span>`
-    : "";
+  const badge = getEtaVariantBadge(recommended.item);
 
   transferAdvisorElements.result.innerHTML = `
     <div class="recommendation-main">
@@ -614,17 +612,59 @@ function normalizeEta(config, items, now = new Date()) {
   const unique = [];
 
   for (const item of upcoming) {
-    const duplicate = unique.find((existing) => {
+    const duplicateIndex = unique.findIndex((existing) => {
       const closeInTime = Math.abs(existing.etaDate - item.etaDate) < 90_000;
-      return closeInTime && existing.route === item.route && existing.variantClass === item.variantClass;
+      return closeInTime && existing.route === item.route;
     });
 
-    if (!duplicate) {
+    if (duplicateIndex === -1) {
       unique.push(item);
+      continue;
     }
+
+    unique[duplicateIndex] = mergeDuplicateEta(unique[duplicateIndex], item);
   }
 
   return unique.slice(0, config.maxItems);
+}
+
+function mergeDuplicateEta(existing, item) {
+  if (existing.variantClass === item.variantClass) {
+    return existing;
+  }
+
+  const classes = new Set([existing.variantClass, item.variantClass].filter(Boolean));
+  const hasFastAndSlow = classes.has("fast") && classes.has("slow");
+
+  if (!hasFastAndSlow) {
+    return existing;
+  }
+
+  const preferred = existing.etaDate <= item.etaDate ? existing : item;
+  return {
+    ...preferred,
+    variantLabel: "变体未定",
+    variantClass: "mixed",
+    rmk_sc: preferred.rmk_sc || item.rmk_sc,
+    rmk_tc: preferred.rmk_tc || item.rmk_tc,
+  };
+}
+
+function getEtaVariantBadge(item) {
+  if (!item.variantLabel) {
+    return "";
+  }
+
+  const badgeClass = item.variantClass ? ` eta-badge--${item.variantClass}` : "";
+  return `<span class="eta-badge${badgeClass}">${item.variantLabel}</span>`;
+}
+
+function getEtaRowVariantClass(item) {
+  if (!item.variantClass || item.variantClass === "mixed") {
+    return "";
+  }
+
+  return ` eta-row--${item.variantClass}`;
 }
 
 function formatMinutes(etaDate, now = new Date()) {
@@ -658,10 +698,8 @@ function renderEta(panel, items) {
       const row = document.createElement("article");
       const minutes = formatMinutes(item.etaDate, now);
       const remark = item.rmk_sc || item.rmk_tc || "";
-      const variantClass = item.variantClass ? ` eta-row--${item.variantClass}` : "";
-      const variantBadge = item.variantLabel
-        ? `<span class="eta-badge eta-badge--${item.variantClass}">${item.variantLabel}</span>`
-        : "";
+      const variantClass = getEtaRowVariantClass(item);
+      const variantBadge = getEtaVariantBadge(item);
 
       row.className = `eta-row${variantClass}`;
       row.innerHTML = `
