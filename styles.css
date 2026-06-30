@@ -191,8 +191,26 @@ h1 {
   color: var(--accent);
 }
 
-.transfer-result {
+.transfer-result,
+.departure-result {
   padding: 14px 18px 16px;
+}
+
+.departure-options {
+  display: grid;
+  gap: 12px;
+}
+
+.departure-option {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.departure-option:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .recommendation-main {

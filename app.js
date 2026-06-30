@@ -183,13 +183,16 @@ const commuteGroups = [
 const routeConfigs = commuteGroups.flatMap((group) => group.routes);
 const stopsRoot = document.querySelector("#stopsRoot");
 const refreshButton = document.querySelector("#refreshButton");
+const departureBufferMinutes = 5;
 const transferBufferMinutes = 5;
 const eastRailTravelMinutes = {
   taiWaiToShaTin: 3,
   shaTinToUniversity: 7,
 };
+let departureAdvisorElements = null;
 let selectedTransferPosition = "at-tai-wai";
 let transferAdvisorElements = null;
+const latestEtaByRoute = new Map();
 
 const transferPositions = [
   {
@@ -216,6 +219,30 @@ const transferStations = {
     routeIds: ["kmb-272a-university-st905", "gmb-27b-university-st905"],
   },
 };
+
+function createDepartureAdvisor(groupRoot) {
+  const panel = document.createElement("section");
+  panel.className = "transfer-advisor departure-advisor";
+  panel.setAttribute("aria-labelledby", "departure-advisor-title");
+  panel.innerHTML = `
+    <header class="transfer-heading">
+      <div>
+        <p class="transfer-kicker">出门建议</p>
+        <h3 class="transfer-title" id="departure-advisor-title">预留 ${departureBufferMinutes} 分钟乘车</h3>
+      </div>
+      <span class="transfer-rule">最快两班</span>
+    </header>
+    <div class="departure-result" data-departure-result>
+      <div class="loading-row">正在计算...</div>
+    </div>
+  `;
+
+  groupRoot.appendChild(panel);
+  departureAdvisorElements = {
+    panel,
+    result: panel.querySelector("[data-departure-result]"),
+  };
+}
 
 function sortRoutesByStop(routes) {
   const stopOrder = [];
@@ -338,6 +365,10 @@ const panels = new Map();
 
 for (const group of commuteGroups) {
   const groupRoot = createCommuteGroup(group);
+
+  if (group.id === "workbound") {
+    createDepartureAdvisor(groupRoot);
+  }
 
   if (group.id === "homebound") {
     createTransferAdvisor(groupRoot);
@@ -600,6 +631,74 @@ function renderTransferUnavailable(stationResults) {
   `;
 }
 
+function setDepartureLoading() {
+  if (!departureAdvisorElements) {
+    return;
+  }
+
+  departureAdvisorElements.result.innerHTML = '<div class="loading-row">正在计算...</div>';
+}
+
+function refreshDepartureRecommendation() {
+  if (!departureAdvisorElements) {
+    return;
+  }
+
+  const group = commuteGroups.find((item) => item.id === "workbound");
+  const now = new Date();
+  const readyAt = new Date(now.getTime() + departureBufferMinutes * 60_000);
+  const candidates = group.routes
+    .flatMap((config) => {
+      const items = latestEtaByRoute.get(config.id) || [];
+      return items.map((item) => ({
+        config,
+        item,
+        departureTime: new Date(item.etaDate.getTime() - departureBufferMinutes * 60_000),
+      }));
+    })
+    .filter(({ item }) => item.etaDate.getTime() >= readyAt.getTime())
+    .sort((a, b) => a.item.etaDate - b.item.etaDate || a.config.stopLabel.localeCompare(b.config.stopLabel, "zh-Hans-HK"))
+    .slice(0, 2);
+
+  if (candidates.length === 0) {
+    departureAdvisorElements.result.innerHTML = `
+      <div class="recommendation-main">
+        <p class="recommendation-label">暂无可赶上的班次</p>
+        <p class="recommendation-detail">按 ${departureBufferMinutes} 分钟乘车预留时间过滤后，暂时没有合适班次。</p>
+      </div>
+    `;
+    return;
+  }
+
+  departureAdvisorElements.result.innerHTML = `
+    <div class="departure-options">
+      ${candidates.map((candidate, index) => renderDepartureOption(candidate, index)).join("")}
+    </div>
+  `;
+}
+
+function renderDepartureOption(candidate, index) {
+  const { config, item, departureTime } = candidate;
+  const title = index === 0 ? "最快方案" : "第二快方案";
+  const remark = item.rmk_sc || item.rmk_tc || "实时预计";
+  const badge = item.variantLabel
+    ? `<span class="eta-badge eta-badge--${item.variantClass}">${item.variantLabel}</span>`
+    : "";
+
+  return `
+    <article class="departure-option">
+      <p class="recommendation-label">${title}</p>
+      <div class="recommendation-route">
+        <strong>${formatClock(departureTime)} 出门</strong>
+        <span>${config.stopLabel} ${config.stopCode}</span>
+      </div>
+      <p class="recommendation-detail">
+        ${formatClock(item.etaDate)} 乘坐 ${config.route} ${badge}，${remark}
+      </p>
+    </article>
+  `;
+}
+
 function normalizeEta(config, items, now = new Date()) {
   const upcoming = items
     .filter((item) => item.eta)
@@ -692,10 +791,12 @@ async function refreshStop(config) {
       config.provider === "gmb"
         ? normalizeEta(config, await fetchGmbEta(config))
         : normalizeEta(config, (await Promise.all(config.serviceTypes.map((serviceType) => fetchServiceType(config, serviceType)))).flat());
+    latestEtaByRoute.set(config.id, items);
     renderEta(panel, items);
     updatedAt.textContent = `更新于 ${formatClock(new Date())}`;
   } catch (error) {
     console.error(error);
+    latestEtaByRoute.set(config.id, []);
     renderError(panel, error.userMessage);
     updatedAt.textContent = "更新失败";
   }
@@ -706,7 +807,10 @@ async function refreshEta() {
   refreshButton.disabled = true;
 
   try {
+    setDepartureLoading();
+    latestEtaByRoute.clear();
     await Promise.all([...routeConfigs.map(refreshStop), refreshTransferRecommendation()]);
+    refreshDepartureRecommendation();
   } finally {
     refreshButton.classList.remove("is-loading");
     refreshButton.disabled = false;
