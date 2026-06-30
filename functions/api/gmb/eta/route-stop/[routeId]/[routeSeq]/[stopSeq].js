@@ -10,6 +10,8 @@ export async function onRequestGet({ params }) {
   const response = await fetch(upstream, {
     headers: {
       accept: "application/json",
+      "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "user-agent": "Mozilla/5.0 (compatible; hk-transit-eta/1.0)",
     },
   });
 

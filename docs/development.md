@@ -48,6 +48,8 @@ curl.exe -s -D - 'https://data.etagmb.gov.hk/eta/route-stop/2007861/1/4' -o NUL
 
 如果没有 `Access-Control-Allow-Origin`，浏览器直连会失败；需要通过 `/api/gmb/eta/route-stop/{route_id}/{route_seq}/{stop_seq}` 代理。
 
+Cloudflare Pages Function 代理请求小巴 API 时必须带 `User-Agent`。上游由 CloudFront 提供服务；如果代理请求没有 `User-Agent`，会返回 `403 Request blocked`。
+
 ## 新增一条九巴查询项
 
 1. 确认用户要看的路线、站点和生活化方向名，例如“往大学站方向”。
