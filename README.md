@@ -1,5 +1,7 @@
 # 白石角公交到站查询
 
+> 项目背景、定制方式和主要可调参数见 [项目说明](docs/project-overview.md)。
+
 一个给 iPhone 使用的轻量公交 ETA 页面。九巴 ETA 可由浏览器直接调用；绿色专线小巴 ETA 需要同源代理，因为小巴接口没有开放浏览器跨域访问。
 
 ## 当前状态
@@ -40,6 +42,7 @@
 ├─ pak-shek-kok-transit-notes.md       # 另一个对话整理的路线/站点备忘录
 ├─ pak-shek-kok-transit-routes.json    # 结构化路线/站点参考数据
 └─ docs/
+   ├─ project-overview.md              # 项目用途、定制方式和可调参数
    ├─ current-context.md               # 当前上下文与新对话交接入口
    ├─ data-sources.md                  # API 与数据规则
    ├─ development.md                   # 开发、验证、加路线流程
@@ -65,6 +68,7 @@
 
 ## 后续开发入口
 
+- 了解项目用途、定制方式和主要参数：看 [docs/project-overview.md](docs/project-overview.md)
 - 新对话继续开发：先看 [docs/current-context.md](docs/current-context.md)
 - 新增路线/站点：看 [docs/development.md](docs/development.md)
 - 核对接口和字段：看 [docs/data-sources.md](docs/data-sources.md)

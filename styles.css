@@ -132,6 +132,29 @@ p {
   display: none;
 }
 
+.app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 10px;
+  margin-top: 24px;
+  padding: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.app-footer a {
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.app-footer a:focus-visible,
+.app-footer a:hover {
+  text-decoration: underline;
+}
+
 .group-heading {
   display: flex;
   align-items: baseline;
