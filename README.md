@@ -4,6 +4,12 @@
 
 一个给 iPhone 使用的轻量公交 ETA 页面。九巴 ETA 可由浏览器直接调用；绿色专线小巴 ETA 需要同源代理，因为小巴接口没有开放浏览器跨域访问。
 
+## 页面预览
+
+| 上班视图 | 下班换乘视图 |
+| --- | --- |
+| <img src="docs/images/preview-work.png" alt="上班视图截图" width="320"> | <img src="docs/images/preview-transfer.png" alt="下班换乘视图截图" width="320"> |
+
 ## 当前状态
 
 已实现查询项：
