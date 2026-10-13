@@ -132,6 +132,14 @@ https://data.etagmb.gov.hk/eta/route-stop/{route_id}/{route_seq}/{stop_seq}
 8. 处理 `eta=[]` 的情况，页面应显示“暂无到站时间”，不要当成错误。
 9. 小巴 API 没有浏览器 CORS 时，前端必须走 `/api/gmb/...` 同源代理。
 
+## 新增嶼巴查询项
+
+1. 从 `https://rt.data.gov.hk/v2/transport/nlb/route.php?action=list` 找到方向对应的 `routeId`。
+2. 从 `https://rt.data.gov.hk/v2/transport/nlb/stop.php?action=list&routeId={routeId}` 核对上车点的 `stopId` 和站序。
+3. 实测 `https://rt.data.gov.hk/v2/transport/nlb/stop.php?action=estimatedArrivals&routeId={routeId}&stopId={stopId}&language=cn`。
+4. 在 `app.js` 的对应分组添加 `provider: "nlb"`；总站上车点设置 `terminal: true`，避免显示“即将到达”。
+5. 同步 `docs/data-sources.md`，并检查移动端方向文字和空 ETA 状态。
+
 ## 推荐演进顺序
 
 1. 继续逐条加入用户常用站点/路线。

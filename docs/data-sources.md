@@ -229,6 +229,29 @@ GET /eta/route-stop/{route_id}/{route_seq}/{stop_seq}
 5. 建议出门时间为 `ETA - 5 分钟`。
 6. 27A 保留 `快车` / `慢车` 标签；27B 保留 `经大学站` 标签。
 
+## 嶼巴 NLB B12
+
+使用嶼巴第二代开放 API，基础地址：
+
+```text
+https://rt.data.gov.hk/v2/transport/nlb
+```
+
+官方[接口说明](https://www.nlb.com.hk/datagovhk/BusServiceOpenAPIDocumentation2.0.pdf)提供路线列表、路线站点和指定站点 ETA。2026-10-13 实测两个查询均返回 3 班，响应带 `Access-Control-Allow-Origin: *`，页面可直接请求。
+
+| 行程 | routeId | 查询上车点 | stopId | 官方站序 | 页面标签 |
+| --- | --- | --- | --- | --- | --- |
+| 云汇往皇岗口岸 | `117` | 云汇，创新路 | `364` | 14 | 预计到站 / 原定班次 |
+| 皇岗口岸回云汇 | `118` | 皇岗口岸总站 | `372` | 1 | 原定开出 |
+
+ETA 请求：
+
+```text
+GET /stop.php?action=estimatedArrivals&routeId={routeId}&stopId={stopId}&language=cn
+```
+
+接口的 `estimatedArrivalTime` 是无时区字符串，例如 `2026-10-13 09:15:00`，页面按香港时间 `+08:00` 解析。云汇去程的 `departed=0` 标为“原定班次”；皇岗总站的下一班时间标为“原定开出”。嶼巴说明中途站预计时间依历史数据计算，不应一概称为实时交通预测。回程查询的是皇岗上车时间，不直接推算到云汇的抵达时间。嶼巴云汇站 `stopId=364` 不等于九巴 `PA206`；两者只是在页面上都称“云汇”。
+
 ## 港铁 MTR
 
 基础地址：

@@ -178,6 +178,37 @@ const commuteGroups = [
       },
     ],
   },
+  {
+    id: "shenzhen",
+    title: "深圳",
+    routes: [
+      {
+        id: "nlb-b12-st-martin-huanggang",
+        provider: "nlb",
+        operatorLabel: "屿巴",
+        route: "B12",
+        routeId: 117,
+        stopId: 364,
+        stopLabel: "云汇",
+        stopCode: "创新路",
+        directionLabel: "往皇岗口岸",
+        maxItems: 3,
+      },
+      {
+        id: "nlb-b12-huanggang-st-martin",
+        provider: "nlb",
+        operatorLabel: "屿巴",
+        route: "B12",
+        routeId: 118,
+        stopId: 372,
+        stopLabel: "皇岗口岸",
+        stopCode: "总站",
+        directionLabel: "往乌溪沙站 · 经云汇",
+        terminal: true,
+        maxItems: 3,
+      },
+    ],
+  },
 ];
 
 const routeConfigs = commuteGroups.flatMap((group) => group.routes);
@@ -500,6 +531,24 @@ async function fetchGmbVariant(config, variant) {
     variantLabel: variant.variantLabel,
     variantClass: variant.variantClass,
   }));
+}
+
+async function fetchNlbEta(config) {
+  const url = `https://rt.data.gov.hk/v2/transport/nlb/stop.php?action=estimatedArrivals&routeId=${config.routeId}&stopId=${config.stopId}&language=cn`;
+  const response = await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) {
+    throw new Error(`${config.route} ${config.stopLabel} ETA failed with ${response.status}`);
+  }
+
+  const payload = await response.json();
+  return (payload.estimatedArrivals || [])
+    .filter((item) => item.estimatedArrivalTime)
+    .map((item) => ({
+      route: config.route,
+      eta: `${item.estimatedArrivalTime.replace(" ", "T")}+08:00`,
+      rmk_sc: config.terminal ? "原定开出" : String(item.departed) === "1" ? "预计到站" : "原定班次",
+    }));
 }
 
 async function fetchMtrNorthboundArrival(stationCode) {
@@ -850,10 +899,10 @@ function normalizeEta(config, items, now = new Date()) {
   return unique.slice(0, config.maxItems);
 }
 
-function formatMinutes(etaDate, now = new Date()) {
+function formatMinutes(etaDate, now = new Date(), action = "到达") {
   const minutes = Math.max(0, Math.round((etaDate - now) / 60_000));
   if (minutes === 0) {
-    return { value: "即将", unit: "到达" };
+    return { value: "即将", unit: action };
   }
 
   return { value: String(minutes), unit: "分钟" };
@@ -867,11 +916,11 @@ function formatClock(date) {
   }).format(date);
 }
 
-function renderEta(panel, items) {
+function renderEta(panel, items, config) {
   const etaList = panel.querySelector("[data-eta-list]");
 
   if (items.length === 0) {
-    etaList.innerHTML = '<div class="empty-row">暂无到站时间</div>';
+    etaList.innerHTML = `<div class="empty-row">暂无${config.terminal ? "开出" : "到站"}时间</div>`;
     return;
   }
 
@@ -879,7 +928,7 @@ function renderEta(panel, items) {
   etaList.replaceChildren(
     ...items.map((item) => {
       const row = document.createElement("article");
-      const minutes = formatMinutes(item.etaDate, now);
+      const minutes = formatMinutes(item.etaDate, now, config.terminal ? "开出" : "到达");
       const remark = item.rmk_sc || item.rmk_tc || "";
       const variantClass = item.variantClass ? ` eta-row--${item.variantClass}` : "";
       const variantBadge = item.variantLabel
@@ -910,13 +959,18 @@ function renderError(panel, message = "更新失败，稍后再试") {
 async function refreshStop(config) {
   const panel = panels.get(config.id);
   try {
-    const items =
-      config.provider === "gmb"
-        ? normalizeEta(config, await fetchGmbEta(config))
-        : normalizeEta(config, (await Promise.all(config.serviceTypes.map((serviceType) => fetchServiceType(config, serviceType)))).flat());
+    let rawItems;
+    if (config.provider === "gmb") {
+      rawItems = await fetchGmbEta(config);
+    } else if (config.provider === "nlb") {
+      rawItems = await fetchNlbEta(config);
+    } else {
+      rawItems = (await Promise.all(config.serviceTypes.map((serviceType) => fetchServiceType(config, serviceType)))).flat();
+    }
+    const items = normalizeEta(config, rawItems);
     latestEtaByRoute.set(config.id, items);
     panel.hidden = config.route === "27B" && items.length === 0;
-    renderEta(panel, items);
+    renderEta(panel, items, config);
   } catch (error) {
     console.error(error);
     latestEtaByRoute.set(config.id, []);
